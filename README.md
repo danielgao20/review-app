@@ -25,8 +25,21 @@ A simple, public-facing review funnel that businesses can set up for their custo
    npm install
    ```
 
-2. **Set up OpenAI API Key**
-   The app uses OpenAI's GPT-3.5-turbo to generate reviews. The API key is already configured in the code for this demo.
+2. **Set up API Keys and Email**
+   The `.env.local` file is already created with your OpenAI API key. For email functionality, you'll need to add email configuration:
+   ```
+   OPENAI_API_KEY=your_openai_api_key_here
+   
+   # Email Configuration (optional - for feedback emails)
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your_email@gmail.com
+   SMTP_PASS=your_app_password
+   EMAIL_FROM=your_email@gmail.com
+   EMAIL_TO=dygao@usc.edu
+   ```
+   
+   **Note**: For Gmail, you'll need to use an App Password instead of your regular password. The app will work without email configuration (feedback will be logged to console).
 
 3. **Run Development Server**
    ```bash
@@ -81,12 +94,29 @@ A simple, public-facing review funnel that businesses can set up for their custo
 - **Styling**: Tailwind CSS
 - **Components**: shadcn/ui
 - **Icons**: Lucide React
-- **AI**: OpenAI GPT-3.5-turbo for review generation
+- **AI**: OpenAI GPT for review generation
+- **Email**: Nodemailer for feedback delivery
+
+## Email Setup (Optional)
+
+The app can send feedback emails using SMTP. To set up email functionality:
+
+1. **For Gmail users:**
+   - Enable 2-factor authentication
+   - Generate an App Password
+   - Use the App Password in `SMTP_PASS`
+
+2. **For other email providers:**
+   - Update `SMTP_HOST` and `SMTP_PORT` accordingly
+   - Use your email credentials
+
+3. **Without email setup:**
+   - Feedback will be logged to the console
+   - App will still function normally
 
 ## Future Enhancements
 
 - Database integration for business data storage
-- Email service integration for feedback delivery
 - Analytics dashboard for business owners
 - Custom domain support
 - Multi-language support

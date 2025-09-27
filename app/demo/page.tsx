@@ -7,12 +7,14 @@ import Link from 'next/link'
 
 export default function DemoPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
       {/* Header */}
-      <header className="border-b">
+      <header className="border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Review Funnel</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Review Funnel
+            </h1>
             <div className="flex gap-4">
               <Button variant="outline" asChild>
                 <Link href="/">Setup Business</Link>
@@ -28,18 +30,18 @@ export default function DemoPage() {
       {/* Hero Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6">
+          <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Turn Every Customer Into a Review
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
             A simple, frictionless review funnel that routes customers based on their experience. 
             No signup required, mobile-friendly, and designed for maximum conversion.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" asChild>
+            <Button size="lg" asChild className="shadow-lg">
               <Link href="/">Get Started</Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
+            <Button variant="outline" size="lg" asChild className="shadow-lg">
               <Link href="/review/marios-pizza">Try Demo</Link>
             </Button>
           </div>

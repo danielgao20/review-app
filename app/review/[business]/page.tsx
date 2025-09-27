@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Star, MessageSquare, ExternalLink } from 'lucide-react'
+import { Star, MessageSquare, ExternalLink, ArrowLeft, Home } from 'lucide-react'
+import Link from 'next/link'
 
 interface BusinessData {
   name: string
@@ -36,10 +37,10 @@ export default function CustomerReviewPage() {
   const [isGenerating, setIsGenerating] = useState(false)
 
   const ratings = [
-    { emoji: '😞', label: 'Bad', value: 1 },
-    { emoji: '😐', label: 'OK', value: 2 },
+    { emoji: '😍', label: 'Excellent', value: 4 },
     { emoji: '😊', label: 'Good', value: 3 },
-    { emoji: '😍', label: 'Excellent', value: 4 }
+    { emoji: '😐', label: 'OK', value: 2 },
+    { emoji: '😞', label: 'Bad', value: 1 }
   ]
 
   const handleRatingSelect = (rating: number) => {
@@ -137,53 +138,86 @@ export default function CustomerReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-2xl">🍕</span>
-          </div>
-          <CardTitle>{mockBusinessData.name}</CardTitle>
-          <CardDescription>{mockBusinessData.location}</CardDescription>
-        </CardHeader>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg space-y-4">
+        {/* Back to Home Button */}
+        <div className="flex justify-start">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/demo">
+              <Home className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
+          </Button>
+        </div>
+        
+        <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+          <CardHeader className="text-center pb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-sm">
+              <span className="text-3xl">🍕</span>
+            </div>
+            <CardTitle className="text-2xl font-bold">{mockBusinessData.name}</CardTitle>
+            <CardDescription className="text-base">{mockBusinessData.location}</CardDescription>
+          </CardHeader>
         <CardContent className="space-y-6">
           {!selectedRating ? (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-center">
-                How was your experience?
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-8">
+              <div className="text-center space-y-2">
+                <h3 className="text-xl font-semibold">
+                  How was your experience?
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Tap an emoji to rate your visit
+                </p>
+              </div>
+              <div className="flex gap-3 justify-center">
                 {ratings.map((rating) => (
                   <Button
                     key={rating.value}
                     variant="outline"
-                    className="h-20 flex flex-col gap-2 hover:bg-accent"
+                    className="h-20 w-20 flex flex-col gap-2 hover:bg-accent hover:scale-105 transition-all duration-200 border-2 hover:border-primary/20"
                     onClick={() => handleRatingSelect(rating.value)}
                   >
-                    <span className="text-2xl">{rating.emoji}</span>
-                    <span className="text-sm">{rating.label}</span>
+                    <span className="text-3xl">{rating.emoji}</span>
+                    <span className="text-xs font-medium">{rating.label}</span>
                   </Button>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="text-center space-y-4">
-              <div className="text-4xl">
-                {ratings.find(r => r.value === selectedRating)?.emoji}
+            <div className="text-center space-y-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedRating(null)}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back to rating
+              </Button>
+              
+              <div className="space-y-4">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto flex items-center justify-center shadow-sm">
+                  <span className="text-5xl">
+                    {ratings.find(r => r.value === selectedRating)?.emoji}
+                  </span>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-xl font-semibold">
+                    {ratings.find(r => r.value === selectedRating)?.label} Experience
+                  </p>
+                  {selectedRating <= 2 && (
+                    <p className="text-sm text-muted-foreground">
+                      We'd love to hear how we can improve
+                    </p>
+                  )}
+                  {selectedRating > 2 && (
+                    <p className="text-sm text-muted-foreground">
+                      {isGenerating ? 'Generating your review...' : 'Ready to share your experience?'}
+                    </p>
+                  )}
+                </div>
               </div>
-              <p className="text-lg font-medium">
-                {ratings.find(r => r.value === selectedRating)?.label} Experience
-              </p>
-              {selectedRating <= 2 && (
-                <p className="text-sm text-muted-foreground">
-                  We'd love to hear how we can improve
-                </p>
-              )}
-              {selectedRating > 2 && (
-                <p className="text-sm text-muted-foreground">
-                  {isGenerating ? 'Generating your review...' : 'Ready to share your experience?'}
-                </p>
-              )}
             </div>
           )}
 
@@ -271,7 +305,8 @@ export default function CustomerReviewPage() {
             </DialogContent>
           </Dialog>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }

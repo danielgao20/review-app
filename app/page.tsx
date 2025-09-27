@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Building2, Mail, MapPin, Star } from 'lucide-react'
+import { Upload, Building2, Mail, MapPin, Star, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default function BusinessOnboarding() {
@@ -47,20 +47,26 @@ export default function BusinessOnboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="text-center">
-          <Button variant="outline" asChild>
-            <Link href="/demo">← Back to Demo</Link>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg space-y-6">
+        <div className="flex justify-start">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/demo">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Demo
+            </Link>
           </Button>
         </div>
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Building2 className="h-6 w-6" />
+        
+        <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+          <CardHeader className="text-center pb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-sm">
+              <Building2 className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
               Business Setup
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               Step {step} of 3: Set up your review funnel
             </CardDescription>
           </CardHeader>
