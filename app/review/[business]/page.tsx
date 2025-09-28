@@ -32,7 +32,6 @@ export default function CustomerReviewPage() {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [feedback, setFeedback] = useState('')
-  const [customerEmail, setCustomerEmail] = useState('')
   const [generatedReview, setGeneratedReview] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -103,7 +102,7 @@ export default function CustomerReviewPage() {
         body: JSON.stringify({
           businessName: mockBusinessData.name,
           businessEmail: mockBusinessData.email,
-          customerEmail: customerEmail || 'Anonymous',
+          customerEmail: 'Anonymous',
           feedback: feedback,
           rating: selectedRating,
           timestamp: new Date().toISOString()
@@ -122,7 +121,6 @@ export default function CustomerReviewPage() {
     
     setShowFeedbackForm(false)
     setFeedback('')
-    setCustomerEmail('')
     setSelectedRating(null)
   }
 
@@ -235,13 +233,9 @@ export default function CustomerReviewPage() {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Your Email (optional)</label>
-                  <Input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                  />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Your feedback will be sent directly to {mockBusinessData.name} to help them improve.
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">How can we improve?</label>
