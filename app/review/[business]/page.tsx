@@ -48,10 +48,14 @@ export default function CustomerReviewPage() {
     if (rating <= 2) {
       // Bad/OK - show private feedback form
       setShowFeedbackForm(true)
-    } else {
-      // Good/Excellent - generate AI review
+    }
+    // For Good/Excellent, just show the rating - user will click generate button
+  }
+
+  const handleGenerateReview = () => {
+    if (selectedRating && selectedRating > 2) {
       setIsGenerating(true)
-      generateAIReview(rating)
+      generateAIReview(selectedRating)
     }
   }
 
@@ -209,9 +213,23 @@ export default function CustomerReviewPage() {
                       We'd love to hear how we can improve
                     </p>
                   )}
-                  {selectedRating > 2 && (
+                  {selectedRating > 2 && !showReviewForm && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Ready to share your experience? We'll help you write a great review.
+                      </p>
+                      <Button 
+                        onClick={handleGenerateReview}
+                        className="w-full"
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? 'Generating Review...' : 'Generate Review'}
+                      </Button>
+                    </div>
+                  )}
+                  {selectedRating > 2 && showReviewForm && (
                     <p className="text-sm text-muted-foreground">
-                      {isGenerating ? 'Generating your review...' : 'Ready to share your experience?'}
+                      Edit your review below, then post it on Google
                     </p>
                   )}
                 </div>
