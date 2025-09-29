@@ -129,7 +129,7 @@ export default function DemoPage() {
                 <div className="space-y-2">
                   <h4 className="font-medium">1. Rate with Emojis</h4>
                   <p className="text-sm text-[#6B7280]">
-                    Choose from 😞 😐 😊 😍 - no forms to fill out
+                    Choose from 😞 😐 😊 🤩 - no forms to fill out
                   </p>
                 </div>
                 <div className="space-y-2">
