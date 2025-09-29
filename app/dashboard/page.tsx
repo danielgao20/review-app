@@ -209,9 +209,9 @@ export default function DashboardPage() {
             <Card className="shadow-none">
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm">
+                  <div className="w-32 h-32 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm">
                     {business.logo_url ? (
-                      <img src={business.logo_url} alt={business.name} className="w-12 h-12 rounded-lg object-cover" />
+                      <img src={business.logo_url} alt={business.name} className="w-28 h-28 rounded-lg object-cover" />
                     ) : (
                       <Building2 className="h-8 w-8 text-primary" />
                     )}
@@ -257,9 +257,9 @@ export default function DashboardPage() {
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Logo</label>
                         <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden">
+                          <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden">
                             {business?.logo_url ? (
-                              <img src={business.logo_url} alt={business.name} className="w-12 h-12 rounded-lg object-cover" />
+                              <img src={business.logo_url} alt={business.name} className="w-20 h-20 rounded-lg object-cover" />
                             ) : (
                               <Building2 className="h-8 w-8 text-primary" />
                             )}

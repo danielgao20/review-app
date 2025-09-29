@@ -244,9 +244,9 @@ export default function CustomerReviewPage({ params }: { params: { business: str
             </Button>
           )}
           <CardHeader className="text-center pb-0 mt-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-6 mb-6 flex items-center justify-center shadow-sm">
+            <div className="w-40 h-40 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-6 mb-6 flex items-center justify-center shadow-sm">
               {businessData.logo_url ? (
-                <img src={businessData.logo_url} alt={businessData.name} className="w-12 h-12 rounded-lg object-cover" />
+                <img src={businessData.logo_url} alt={businessData.name} className="w-36 h-36 rounded-lg object-cover" />
               ) : (
                 <Building2 className="h-8 w-8 text-primary" />
               )}
