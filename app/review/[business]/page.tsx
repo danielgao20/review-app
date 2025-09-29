@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2 } from 'lucide-react'
+import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { Business } from '@/types/database'
 
@@ -218,7 +218,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
               {businessData.logo_url ? (
                 <img src={businessData.logo_url} alt={businessData.name} className="w-12 h-12 rounded-lg object-cover" />
               ) : (
-                <span className="text-3xl">🍕</span>
+                <Building2 className="h-8 w-8 text-primary" />
               )}
             </div>
             <CardTitle className="text-2xl font-bold">{businessData.name}</CardTitle>
