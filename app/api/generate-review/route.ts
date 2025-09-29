@@ -36,6 +36,7 @@ Requirements:
 - End with a recommendation
 - Make it sound like a real customer review
 - Do not use em dashes
+- Make every review different and unique.
 `
 
     const completion = await openai.chat.completions.create({
