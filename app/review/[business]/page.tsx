@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2 } from 'lucide-react'
+import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2, Check } from 'lucide-react'
 import Link from 'next/link'
 import { Business } from '@/types/database'
 
@@ -29,6 +29,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   const [businessData, setBusinessData] = useState<Business | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isCopied, setIsCopied] = useState(false)
 
   const ratings = [
     { emoji: '😍', label: 'Excellent', value: 4 },
@@ -148,18 +149,30 @@ export default function CustomerReviewPage({ params }: { params: { business: str
     setSelectedRating(null)
   }
 
-  const handleReviewSubmit = () => {
+  const handleReviewSubmit = async () => {
+    try {
+      // Copy the review text to clipboard first
+      await navigator.clipboard.writeText(generatedReview)
+      setIsCopied(true)
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Failed to copy review:', error)
+    }
+    
     // Open Google Review link in new tab
     if (businessData?.google_review_link) {
       window.open(businessData.google_review_link, '_blank')
     }
-    setShowReviewForm(false)
-    setSelectedRating(null)
+    // Don't close the form or reset the rating - let user stay on the review page
   }
 
   const handleEditReview = (newReview: string) => {
     setGeneratedReview(newReview)
   }
+
 
   // Loading state
   if (isLoading) {
@@ -363,10 +376,23 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   </Button>
                   <Button 
                     onClick={handleReviewSubmit}
-                    className="flex-1"
+                    className={`flex-1 transition-all duration-200 ${
+                      isCopied 
+                        ? 'bg-green-600 hover:bg-green-700' 
+                        : ''
+                    }`}
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Post on Google
+                    {isCopied ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Copied & Posted!
+                      </>
+                    ) : (
+                      <>
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Copy and Post on Google
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
