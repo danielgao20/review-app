@@ -189,9 +189,9 @@ export default function CustomerReviewPage({ params }: { params: { business: str
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <p className="text-destructive font-medium">{error || 'Business not found'}</p>
-              <Button variant="outline" asChild>
-                <Link href="/demo">Back to Home</Link>
-              </Button>
+                      <Button variant="outline" asChild>
+                        <Link href="/">Back to Home</Link>
+                      </Button>
             </div>
           </CardContent>
         </Card>
@@ -204,12 +204,12 @@ export default function CustomerReviewPage({ params }: { params: { business: str
       <div className="w-full max-w-lg space-y-4">
         {/* Back to Home Button */}
         <div className="flex justify-start">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/demo">
-              <Home className="h-4 w-4 mr-2" />
-              Back to Home
-            </Link>
-          </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/">
+                    <Home className="h-4 w-4 mr-2" />
+                    Back to Home
+                  </Link>
+                </Button>
         </div>
         
         <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
@@ -314,11 +314,6 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Your feedback will be sent directly to {businessData.name} to help them improve.
-                  </p>
-                </div>
                 <div>
                   <label className="text-sm font-medium">How can we improve?</label>
                   <Textarea

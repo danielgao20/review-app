@@ -17,10 +17,10 @@ export default function DemoPage() {
             </h1>
             <div className="flex gap-4">
               <Button variant="outline" asChild>
-                <Link href="/auth/signup">Get Started</Link>
+                <Link href="/auth/signin">Sign In</Link>
               </Button>
               <Button asChild>
-                <Link href="/review/marios-pizza">View Demo</Link>
+                <Link href="/auth/signup">Get Started</Link>
               </Button>
             </div>
           </div>
