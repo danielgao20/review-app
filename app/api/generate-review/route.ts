@@ -11,13 +11,9 @@ export async function POST(request: NextRequest) {
     // Check if API key is configured
     if (!process.env.OPENAI_API_KEY) {
       console.error('OpenAI API key not configured')
-      const { businessName, location, keywords, rating } = await request.json()
-      const ratingText = rating === 3 ? 'good' : 'excellent'
-      const fallbackReview = `I had a ${ratingText} experience at ${businessName} in ${location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
-      
       return NextResponse.json({ 
         success: true, 
-        review: fallbackReview 
+        review: '' 
       })
     }
 
@@ -35,7 +31,7 @@ Requirements:
 - Write in first person as a customer
 - Mention the business name and location naturally
 - Include relevant keywords: ${keywordList}
-- Keep it authentic and specific (not generic)
+- Keep it authentic and specific (not generic) but not too specific (no details).
 - 3-4 sentences long
 - End with a recommendation
 - Make it sound like a real customer review
@@ -67,14 +63,10 @@ Requirements:
   } catch (error) {
     console.error('Error generating review:', error)
     
-    // Fallback to a simple template if OpenAI fails
-    const { businessName, location, keywords, rating } = await request.json()
-    const ratingText = rating === 3 ? 'good' : 'excellent'
-    const fallbackReview = `I had a ${ratingText} experience at ${businessName} in ${location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
-    
+    // Fallback to blank review if OpenAI fails
     return NextResponse.json({ 
       success: true, 
-      review: fallbackReview 
+      review: '' 
     })
   }
 }

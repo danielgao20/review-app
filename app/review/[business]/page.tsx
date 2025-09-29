@@ -102,17 +102,13 @@ export default function CustomerReviewPage({ params }: { params: { business: str
         const data = await response.json()
         setGeneratedReview(data.review)
       } else {
-        // Fallback to simple template if API fails
-        const ratingText = rating === 3 ? 'good' : 'excellent'
-        const fallbackReview = `I had a ${ratingText} experience at ${businessData?.name} in ${businessData?.location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
-        setGeneratedReview(fallbackReview)
+        // Fallback to blank review if API fails
+        setGeneratedReview('')
       }
     } catch (error) {
       console.error('Error generating review:', error)
-      // Fallback to simple template if API fails
-      const ratingText = rating === 3 ? 'good' : 'excellent'
-      const fallbackReview = `I had a ${ratingText} experience at ${businessData?.name} in ${businessData?.location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
-      setGeneratedReview(fallbackReview)
+      // Fallback to blank review if API fails
+      setGeneratedReview('')
     }
     
     setIsGenerating(false)
@@ -352,6 +348,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   <Textarea
                     value={generatedReview}
                     onChange={(e) => handleEditReview(e.target.value)}
+                    placeholder="Write your review here... Share your experience and what you liked about this business."
                     rows={6}
                     className="resize-none"
                   />
