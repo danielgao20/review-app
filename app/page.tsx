@@ -12,7 +12,7 @@ export default function BusinessOnboarding() {
   const [step, setStep] = useState(1)
   const [businessData, setBusinessData] = useState({
     name: '',
-    email: 'dygao@usc.edu',
+    email: '',
     logo: null as File | null,
     location: '',
     keywords: '',

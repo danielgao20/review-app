@@ -76,7 +76,7 @@ This feedback was sent via Review Funnel App.
     // Send email
     const mailOptions = {
       from: process.env.EMAIL_FROM || process.env.SMTP_USER,
-      to: process.env.EMAIL_TO || 'dygao@usc.edu',
+      to: process.env.EMAIL_TO || 'leaveratings@gmail.com',
       subject: `Customer Feedback - ${businessName}`,
       text: emailContent,
       html: `
@@ -108,11 +108,11 @@ This feedback was sent via Review Funnel App.
     }
 
     await transporter.sendMail(mailOptions)
-    console.log('Email sent successfully to:', process.env.EMAIL_TO || 'dygao@usc.edu')
+    console.log('Email sent successfully to:', process.env.EMAIL_TO || 'leaveratings@gmail.com')
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Feedback sent successfully to dygao@usc.edu' 
+      message: 'Feedback sent successfully to leaveratings@gmail.com' 
     })
 
   } catch (error) {

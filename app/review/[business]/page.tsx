@@ -121,7 +121,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
 
   const handleFeedbackSubmit = async () => {
     try {
-      // Send feedback to dygao@usc.edu
+      // Send feedback to business owner
       const response = await fetch('/api/send-feedback', {
         method: 'POST',
         headers: {
