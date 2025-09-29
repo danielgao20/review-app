@@ -1,5 +1,27 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export async function generateMetadata({ params }: { params: { business: string } }) {
+  // Build absolute URL for server-side fetch (works locally and in prod)
+  const host = typeof window === 'undefined' ? (process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SITE_URL || 'localhost:3000') : window.location.host
+  const protocol = (process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SITE_URL) ? 'https' : 'http'
+  let title = 'Leave Rating'
+  try {
+    const res = await fetch(`${protocol}://${host}/api/business/${params.business}`, { cache: 'no-store' })
+    if (res.ok) {
+      const data = await res.json()
+      const name = data?.business?.name
+      if (name) title = `Leave Rating for ${name}`
+    }
+  } catch {}
+
+  return {
+    title,
+    openGraph: { title },
+    twitter: { title }
+  }
+}
+
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
