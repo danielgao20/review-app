@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+// Removed modal dialog components in favor of inline sections
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2, Check } from 'lucide-react'
@@ -30,6 +30,8 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isCopied, setIsCopied] = useState(false)
+  const [isFeedbackSent, setIsFeedbackSent] = useState(false)
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false)
 
   const ratings = [
     { emoji: '😍', label: 'Excellent', value: 4 },
@@ -66,6 +68,22 @@ export default function CustomerReviewPage({ params }: { params: { business: str
 
     fetchBusinessData()
   }, [params.business])
+
+  // Reset feedback UI when business changes
+  useEffect(() => {
+    setShowFeedbackForm(false)
+    setIsFeedbackSent(false)
+    setFeedback('')
+  }, [params.business])
+
+  // Hide feedback form when rating is cleared or changed to > 2
+  useEffect(() => {
+    if (selectedRating === null || (selectedRating !== null && selectedRating > 2)) {
+      setShowFeedbackForm(false)
+      setIsFeedbackSent(false)
+      setFeedback('')
+    }
+  }, [selectedRating])
 
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating)
@@ -117,6 +135,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   }
 
   const handleFeedbackSubmit = async () => {
+    setIsFeedbackLoading(true)
     try {
       // Send feedback to business owner
       const response = await fetch('/api/send-feedback', {
@@ -133,20 +152,15 @@ export default function CustomerReviewPage({ params }: { params: { business: str
           timestamp: new Date().toISOString()
         }),
       })
-
-      if (response.ok) {
-        alert('Thank you for your feedback! It has been sent directly to the business owner.')
-      } else {
-        alert('Thank you for your feedback! It has been sent directly to the business owner.')
-      }
+      // Regardless of response, show inline success state
+      setIsFeedbackSent(true)
     } catch (error) {
-      // Still show success message even if email fails
-      alert('Thank you for your feedback! It has been sent directly to the business owner.')
+      // Still show success state even if email fails
+      setIsFeedbackSent(true)
     }
-    
-    setShowFeedbackForm(false)
+    // Keep the form open and selected rating; clear the text input
     setFeedback('')
-    setSelectedRating(null)
+    setIsFeedbackLoading(false)
   }
 
   const handleReviewSubmit = async () => {
@@ -211,19 +225,26 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-4">
-        {/* Back to Home Button */}
-        {/* <div className="flex justify-start">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/">
-                    <Home className="h-4 w-4 mr-2" />
-                    Back to Home
-                  </Link>
-                </Button>
-        </div> */}
         
-        <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-sm">
+        <Card className="relative w-full shadow-md">
+          {selectedRating && (
+            <Button
+              variant="ghost"
+              size="default"
+              onClick={() => {
+                setSelectedRating(null)
+                setShowFeedbackForm(false)
+                setIsFeedbackSent(false)
+                setFeedback('')
+              }}
+              className="absolute left-3 top-3 z-10"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to rating
+            </Button>
+          )}
+          <CardHeader className="text-center pb-0 mt-8">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-6 mb-6 flex items-center justify-center shadow-sm">
               {businessData.logo_url ? (
                 <img src={businessData.logo_url} alt={businessData.name} className="w-12 h-12 rounded-lg object-cover" />
               ) : (
@@ -232,8 +253,11 @@ export default function CustomerReviewPage({ params }: { params: { business: str
             </div>
             <CardTitle className="text-2xl font-bold">{businessData.name}</CardTitle>
             <CardDescription className="text-base">{businessData.location}</CardDescription>
+            <div className="w-full py-6">
+              <div className="h-px bg-border w-1/2 mx-auto" />
+            </div>
           </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pb-12">
           {!selectedRating ? (
             <div className="space-y-8">
               <div className="text-center space-y-2">
@@ -260,18 +284,9 @@ export default function CustomerReviewPage({ params }: { params: { business: str
             </div>
           ) : (
             <div className="text-center space-y-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedRating(null)}
-                className="mb-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to rating
-              </Button>
               
               <div className="space-y-4">
-                <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto flex items-center justify-center shadow-sm">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-6 flex items-center justify-center shadow-sm">
                   <span className="text-5xl">
                     {ratings.find(r => r.value === selectedRating)?.emoji}
                   </span>
@@ -310,94 +325,129 @@ export default function CustomerReviewPage({ params }: { params: { business: str
             </div>
           )}
 
-          {/* Feedback Form Dialog */}
-          <Dialog open={showFeedbackForm} onOpenChange={setShowFeedbackForm}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
+          {/* Inline Feedback Form */}
+          {showFeedbackForm && (
+            <div className="space-y-4 rounded-lg p-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
                   <MessageSquare className="h-5 w-5" />
-                  Private Feedback
-                </DialogTitle>
-                <DialogDescription>
+                  <span className="font-medium">Private Feedback</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
                   Your feedback will be sent directly to {businessData.name} to help them improve.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
+                </p>
+              </div>
+              {!isFeedbackSent ? (
                 <div>
                   <label className="text-sm font-medium">How can we improve?</label>
                   <Textarea
                     placeholder="Tell us what went wrong and how we can do better..."
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    rows={4}
+                    rows={6}
                   />
                 </div>
+              ) : (
+                <div className="rounded-md bg-muted p-3 text-left">
+                  <p className="text-sm">
+                    Thank you for your feedback! It has been sent directly to the business owner.
+                  </p>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedRating(null)
+                    setShowFeedbackForm(false)
+                    setShowReviewForm(false)
+                    setIsFeedbackSent(false)
+                    setFeedback('')
+                  }}
+                >
+                  Cancel
+                </Button>
                 <Button 
                   onClick={handleFeedbackSubmit}
-                  disabled={!feedback.trim()}
-                  className="w-full"
+                  disabled={!feedback.trim() || isFeedbackSent || isFeedbackLoading}
+                  className={`min-w-[140px] transition-all duration-300 ${
+                    isFeedbackSent 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : ''
+                  }`}
                 >
-                  Send Feedback
+                  {isFeedbackSent ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Sent
+                    </>
+                  ) : isFeedbackLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Feedback'
+                  )}
                 </Button>
               </div>
-            </DialogContent>
-          </Dialog>
+            </div>
+          )}
 
-          {/* Review Form Dialog */}
-          <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5" />
-                  Share Your Experience
-                </DialogTitle>
-                <DialogDescription>
-                  We've drafted a review for you. Edit it if you'd like, then post it on Google.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Your Review</label>
-                  <Textarea
-                    value={generatedReview}
-                    onChange={(e) => handleEditReview(e.target.value)}
-                    placeholder="Write your review here... Share your experience and what you liked about this business."
-                    rows={6}
-                    className="resize-none"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowReviewForm(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleReviewSubmit}
-                    className={`flex-1 transition-all duration-200 ${
-                      isCopied 
-                        ? 'bg-green-600 hover:bg-green-700' 
-                        : ''
-                    }`}
-                  >
-                    {isCopied ? (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Copied & Posted!
-                      </>
-                    ) : (
-                      <>
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Copy and Post on Google
-                      </>
-                    )}
-                  </Button>
-                </div>
+          {/* Inline Review Form */}
+          {showReviewForm && (
+            <div className="space-y-4 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Star className="h-5 w-5" />
+                <span className="font-medium">Share Your Experience</span>
               </div>
-            </DialogContent>
-          </Dialog>
+              <p className="text-sm text-muted-foreground">
+                We've drafted a review for you. Edit it if you'd like, then post it on Google.
+              </p>
+              <div>
+                <label className="text-sm font-medium">Your Review</label>
+                <Textarea
+                  value={generatedReview}
+                  onChange={(e) => handleEditReview(e.target.value)}
+                  placeholder="Write your review here... Share your experience and what you liked about this business."
+                  rows={10}
+                  className="resize-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowReviewForm(false)
+                    setSelectedRating(null)
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleReviewSubmit}
+                  className={`flex-1 transition-all duration-200 ${
+                    isCopied 
+                      ? 'bg-green-600 hover:bg-green-700' 
+                      : ''
+                  }`}
+                >
+                  {isCopied ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Copied & Posted!
+                    </>
+                  ) : (
+                    <>
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Copy and Post on Google
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
         </Card>
       </div>
