@@ -150,7 +150,7 @@ export default function SignUpPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Keywords (optional)</label>
+                <label className="text-sm font-medium">Keywords (AI will generate reviews based on these keywords)</label>
                 <Input
                   name="keywords"
                   placeholder="e.g., restaurant, pizza, delivery"
