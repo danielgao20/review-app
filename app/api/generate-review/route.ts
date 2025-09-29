@@ -39,11 +39,10 @@ Requirements:
 - 3-4 sentences long
 - End with a recommendation
 - Make it sound like a real customer review
-
-Example format: "I had a great experience at [Business Name] in [Location]. The [service/product] was excellent and the staff was very friendly. I would definitely recommend this place to anyone looking for [keywords]. Five stars!"`
+`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4-turbo",
       messages: [
         {
           role: "system",
