@@ -199,14 +199,14 @@ export default function CustomerReviewPage({ params }: { params: { business: str
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-4">
         {/* Back to Home Button */}
-        <div className="flex justify-start">
+        {/* <div className="flex justify-start">
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/">
                     <Home className="h-4 w-4 mr-2" />
                     Back to Home
                   </Link>
                 </Button>
-        </div>
+        </div> */}
         
         <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
           <CardHeader className="text-center pb-6">
