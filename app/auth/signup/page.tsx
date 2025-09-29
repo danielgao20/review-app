@@ -159,7 +159,7 @@ export default function SignUpPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Google Review Link (optional)</label>
+                <label className="text-sm font-medium">Google Review Link</label>
                 <Input
                   name="googleReviewLink"
                   placeholder="https://g.page/r/your-business/review"
