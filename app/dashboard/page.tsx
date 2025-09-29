@@ -5,14 +5,26 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2 } from 'lucide-react'
+import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2, Pencil } from 'lucide-react'
 import Link from 'next/link'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [business, setBusiness] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    location: '',
+    keywords: '',
+    google_review_link: ''
+  })
 
   useEffect(() => {
     if (status === 'loading') return // Still loading
@@ -31,6 +43,13 @@ export default function DashboardPage() {
         if (response.ok) {
           const data = await response.json()
           setBusiness(data.business)
+          setForm({
+            name: data.business.name || '',
+            email: data.business.email || '',
+            location: data.business.location || '',
+            keywords: data.business.keywords || '',
+            google_review_link: data.business.google_review_link || ''
+          })
         }
       } catch (error) {
         console.error('Error fetching business:', error)
@@ -65,10 +84,62 @@ export default function DashboardPage() {
     signOut({ callbackUrl: '/demo' })
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSave = async () => {
+    if (!business) return
+    try {
+      setIsSaving(true)
+      const res = await fetch(`/api/business/${business.slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          location: form.location,
+          keywords: form.keywords || null,
+          google_review_link: form.google_review_link || null
+        })
+      })
+
+      if (!res.ok) {
+        console.error('Failed to update business')
+        return
+      }
+
+      const data = await res.json()
+      setBusiness(data.business)
+      // If slug changed due to name update, refresh form and URL-dependent displays
+      if (data.business.slug !== business.slug) {
+        // Re-fetch to ensure consistency
+        const refreshed = await fetch(`/api/business/${data.business.slug}`)
+        if (refreshed.ok) {
+          const refreshedData = await refreshed.json()
+          setBusiness(refreshedData.business)
+          setForm({
+            name: refreshedData.business.name || '',
+            email: refreshedData.business.email || '',
+            location: refreshedData.business.location || '',
+            keywords: refreshedData.business.keywords || '',
+            google_review_link: refreshedData.business.google_review_link || ''
+          })
+        }
+      }
+      setIsDialogOpen(false)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
       {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm">
+      <header className="border-b bg-background">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -91,7 +162,7 @@ export default function DashboardPage() {
         {business ? (
           <div className="space-y-8">
             {/* Business Info Card */}
-            <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+            <Card className="shadow-none">
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm">
@@ -101,10 +172,54 @@ export default function DashboardPage() {
                       <Building2 className="h-8 w-8 text-primary" />
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <CardTitle className="text-2xl">{business.name}</CardTitle>
                     <CardDescription className="text-base">{business.location}</CardDescription>
                   </div>
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Pencil className="h-4 w-4 mr-2" /> Edit
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit business details</DialogTitle>
+                        <DialogDescription>Update your public-facing information.</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Name</label>
+                            <Input name="name" value={form.name} onChange={handleChange} placeholder="Business name" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Email</label>
+                            <Input name="email" value={form.email} onChange={handleChange} type="email" placeholder="contact@email.com" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Location</label>
+                            <Input name="location" value={form.location} onChange={handleChange} placeholder="City, State" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Google Review Link</label>
+                            <Input name="google_review_link" value={form.google_review_link} onChange={handleChange} placeholder="https://g.page/..." />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Keywords</label>
+                          <Textarea name="keywords" value={form.keywords} onChange={handleChange} placeholder="e.g., plumbing, emergency service" />
+                        </div>
+                        
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>Cancel</Button>
+                        <Button onClick={handleSave} disabled={isSaving}>
+                          {isSaving ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving</>) : 'Save changes'}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -141,7 +256,7 @@ export default function DashboardPage() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+              <Card className="shadow-none">
                 <CardHeader className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">
                     <Star className="h-6 w-6 text-green-500" />
@@ -158,7 +273,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+              <Card className="shadow-none">
                 <CardHeader className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">
                     <MessageSquare className="h-6 w-6 text-blue-500" />
@@ -175,7 +290,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+              <Card className="shadow-none">
                 <CardHeader className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">
                     <Building2 className="h-6 w-6 text-purple-500" />
@@ -194,7 +309,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Instructions */}
-            <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+            <Card className="shadow-none">
               <CardHeader>
                 <CardTitle className="text-xl">Getting Started</CardTitle>
                 <CardDescription>
@@ -235,7 +350,7 @@ export default function DashboardPage() {
             </Card>
           </div>
         ) : (
-          <Card className="shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+          <Card className="shadow-none">
             <CardContent className="text-center py-12">
               <div className="space-y-4">
                 <Building2 className="h-12 w-12 mx-auto text-muted-foreground" />

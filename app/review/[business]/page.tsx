@@ -34,7 +34,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false)
 
   const ratings = [
-    { emoji: '😍', label: 'Excellent', value: 4 },
+    { emoji: '🤩', label: 'Excellent', value: 4 },
     { emoji: '😊', label: 'Good', value: 3 },
     { emoji: '😐', label: 'OK', value: 2 },
     { emoji: '😞', label: 'Bad', value: 1 }
@@ -192,7 +192,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+        <Card className="w-full max-w-lg shadow-none">
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -208,7 +208,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   if (error || !businessData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+        <Card className="w-full max-w-lg shadow-none">
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <p className="text-destructive font-medium">{error || 'Business not found'}</p>
@@ -226,7 +226,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-4">
         
-        <Card className="relative w-full shadow-md">
+        <Card className="relative w-full shadow-none">
           {selectedRating && (
             <Button
               variant="ghost"
