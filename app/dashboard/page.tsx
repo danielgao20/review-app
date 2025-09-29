@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2, Pencil } from 'lucide-react'
@@ -18,6 +18,9 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -87,6 +90,47 @@ export default function DashboardPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      console.error('Please select an image file')
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      console.error('File too large (max 2MB)')
+      return
+    }
+    setLogoFile(file)
+  }
+
+  const uploadLogoAndSave = async () => {
+    if (!business || !logoFile) return
+    try {
+      setIsUploadingLogo(true)
+      const formData = new FormData()
+      formData.append('file', logoFile)
+
+      const res = await fetch(`/api/business/${business.slug}/logo`, {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!res.ok) {
+        console.error('Failed to upload logo')
+        return
+      }
+
+      const updated = await res.json()
+      setBusiness(updated.business)
+      setLogoFile(null)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsUploadingLogo(false)
+    }
   }
 
   const handleSave = async () => {
@@ -210,6 +254,50 @@ export default function DashboardPage() {
                           <label className="text-sm font-medium">Keywords</label>
                           <Textarea name="keywords" value={form.keywords} onChange={handleChange} placeholder="e.g., plumbing, emergency service" />
                         </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Logo</label>
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden">
+                            {business?.logo_url ? (
+                              <img src={business.logo_url} alt={business.name} className="w-12 h-12 rounded-lg object-cover" />
+                            ) : (
+                              <Building2 className="h-8 w-8 text-primary" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoSelect} className="hidden" />
+                            <div className="flex items-center gap-3">
+                              <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                Choose file
+                              </Button>
+                              <span className="text-sm text-muted-foreground truncate">
+                                {logoFile ? logoFile.name : 'No file chosen'}
+                              </span>
+                            </div>
+                            <div className="flex gap-2 mt-2 mb-6">
+                              <Button onClick={uploadLogoAndSave} disabled={!logoFile || isUploadingLogo}>
+                                {isUploadingLogo ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading</>) : 'Upload & Save'}
+                              </Button>
+                              {business?.logo_url && (
+                                <Button
+                                  variant="outline"
+                                  onClick={async () => {
+                                    const res = await fetch(`/api/business/${business.slug}/logo`, {
+                                      method: 'DELETE'
+                                    })
+                                    if (res.ok) {
+                                      const updated = await res.json()
+                                      setBusiness(updated.business)
+                                    }
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                         
                       </div>
                       <DialogFooter>
@@ -240,10 +328,10 @@ export default function DashboardPage() {
                       </p>
                       <div className="flex items-center gap-2">
                         <code className="bg-muted px-2 py-1 rounded text-sm">
-                          {typeof window !== 'undefined' ? window.location.origin : ''}/review/{business.slug}
+                          {typeof window !== 'undefined' ? window.location.origin : ''}/{business.slug}
                         </code>
                         <Button variant="outline" size="sm" asChild>
-                          <Link href={`/review/${business.slug}`} target="_blank">
+                          <Link href={`/${business.slug}`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -289,23 +377,6 @@ export default function DashboardPage() {
                   </Button>
                 </CardContent>
               </Card>
-
-              <Card className="shadow-none">
-                <CardHeader className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <CardTitle className="text-lg">Settings</CardTitle>
-                  <CardDescription>
-                    Update business information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <Button className="w-full" disabled>
-                    Coming Soon
-                  </Button>
-                </CardContent>
-              </Card>
             </div>
 
             {/* Instructions */}
@@ -323,7 +394,7 @@ export default function DashboardPage() {
                     <div>
                       <p className="font-medium">Share your review link</p>
                       <p className="text-sm text-muted-foreground">
-                        Send customers to: <code className="bg-muted px-1 rounded">{typeof window !== 'undefined' ? window.location.origin : ''}/review/{business.slug}</code>
+                        Send customers to: <code className="bg-muted px-1 rounded">{typeof window !== 'undefined' ? window.location.origin : ''}/{business.slug}</code>
                       </p>
                     </div>
                   </div>

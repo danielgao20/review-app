@@ -71,7 +71,8 @@ export async function PATCH(
       email,
       location,
       keywords,
-      google_review_link
+      google_review_link,
+      logo_url
     } = body || {}
 
     const updates: Record<string, any> = {}
@@ -87,6 +88,7 @@ export async function PATCH(
     if (typeof location === 'string') updates.location = location.trim()
     if (typeof keywords === 'string' || keywords === null) updates.keywords = keywords
     if (typeof google_review_link === 'string' || google_review_link === null) updates.google_review_link = google_review_link
+  if (typeof logo_url === 'string' || logo_url === null) updates.logo_url = logo_url
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
