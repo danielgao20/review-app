@@ -47,10 +47,47 @@ export default function DemoPage() {
         </div>
       </section>
 
+      {/* How It Works (Detailed) - moved above previous section, white background to match hero */}
+      <section className="py-20 bg-[#FFFFFF]">
+        <div className="container mx-auto px-4">
+          <h3 className="text-3xl font-bold text-center mb-12 text-[#111827]">How It Works</h3>
+
+          {/* Row 1: Video (left) / Text (right) */}
+          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto mb-16">
+            <div className="aspect-video bg-[#E5E7EB] rounded-xl flex items-center justify-center text-[#6B7280]">
+              ▶ Video
+            </div>
+
+            <div className="flex flex-col justify-center space-y-4">
+              <span className="inline-block text-sm font-medium text-[#2563EB]">Smart Filtering</span>
+              <h4 className="text-2xl font-semibold text-[#111827] tracking-tight">Increase Positive Reviews, Decrease Negative Reviews</h4>
+              <p className="text-[#6B7280] leading-relaxed">
+                LeaveRatings uses smart filtering so bad feedback goes to your inbox and good feedback flows straight to Google.
+              </p>
+            </div>
+          </div>
+
+          {/* Row 2: Text (left) / Video (right) */}
+          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <div className="order-2 md:order-1 flex flex-col justify-center space-y-4">
+              <span className="inline-block text-sm font-medium text-[#2563EB]">AI Writing</span>
+              <h4 className="text-2xl font-semibold text-[#111827] tracking-tight">AI-Powered, SEO-Optimized Reviews</h4>
+              <p className="text-[#6B7280] leading-relaxed">
+                Every review is automatically generated with the right keywords to boost your local SEO — unique, natural, and human-sounding.
+              </p>
+            </div>
+
+            <div className="order-1 md:order-2 aspect-video bg-[#E5E7EB] rounded-xl flex items-center justify-center text-[#6B7280]">
+              ▶ Video
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-20 bg-[#F9FAFB]">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12 text-[#111827]">How It Works</h3>
+          <h3 className="text-3xl font-bold text-center mb-12 text-[#111827]">Use Cases</h3>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card>
               <CardHeader>
