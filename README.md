@@ -36,7 +36,7 @@ A simple, public-facing review funnel that businesses can set up for their custo
    SMTP_USER=your_email@gmail.com
    SMTP_PASS=your_app_password
    EMAIL_FROM=your_email@gmail.com
-   EMAIL_TO=dygao@usc.edu
+   EMAIL_TO=your_email@gmail.com
    ```
    
    **Note**: For Gmail, you'll need to use an App Password instead of your regular password. The app will work without email configuration (feedback will be logged to console).

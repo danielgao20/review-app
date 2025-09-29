@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Star, MessageSquare, ExternalLink, ArrowLeft, Home } from 'lucide-react'
+import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { Business } from '@/types/database'
 
 interface BusinessData {
   name: string
@@ -18,22 +19,16 @@ interface BusinessData {
   logo?: string
 }
 
-// Mock business data - in real app, this would come from database
-const mockBusinessData: BusinessData = {
-  name: "Mario's Pizza",
-  email: "dygao@usc.edu",
-  location: "New York, NY",
-  keywords: "pizza, italian, delivery, family restaurant",
-  googleReviewLink: "https://g.page/r/marios-pizza/review"
-}
-
-export default function CustomerReviewPage() {
+export default function CustomerReviewPage({ params }: { params: { business: string } }) {
   const [selectedRating, setSelectedRating] = useState<number | null>(null)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [generatedReview, setGeneratedReview] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [businessData, setBusinessData] = useState<Business | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const ratings = [
     { emoji: '😍', label: 'Excellent', value: 4 },
@@ -41,6 +36,35 @@ export default function CustomerReviewPage() {
     { emoji: '😐', label: 'OK', value: 2 },
     { emoji: '😞', label: 'Bad', value: 1 }
   ]
+
+  // Fetch business data on component mount
+  useEffect(() => {
+    const fetchBusinessData = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch(`/api/business/${params.business}`)
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Business not found')
+          } else {
+            setError('Failed to load business data')
+          }
+          return
+        }
+
+        const data = await response.json()
+        setBusinessData(data.business)
+      } catch (error) {
+        console.error('Error fetching business data:', error)
+        setError('Failed to load business data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBusinessData()
+  }, [params.business])
 
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating)
@@ -67,9 +91,9 @@ export default function CustomerReviewPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          businessName: mockBusinessData.name,
-          location: mockBusinessData.location,
-          keywords: mockBusinessData.keywords,
+          businessName: businessData?.name,
+          location: businessData?.location,
+          keywords: businessData?.keywords,
           rating: rating
         }),
       })
@@ -80,14 +104,14 @@ export default function CustomerReviewPage() {
       } else {
         // Fallback to simple template if API fails
         const ratingText = rating === 3 ? 'good' : 'excellent'
-        const fallbackReview = `I had a ${ratingText} experience at ${mockBusinessData.name} in ${mockBusinessData.location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
+        const fallbackReview = `I had a ${ratingText} experience at ${businessData?.name} in ${businessData?.location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
         setGeneratedReview(fallbackReview)
       }
     } catch (error) {
       console.error('Error generating review:', error)
       // Fallback to simple template if API fails
       const ratingText = rating === 3 ? 'good' : 'excellent'
-      const fallbackReview = `I had a ${ratingText} experience at ${mockBusinessData.name} in ${mockBusinessData.location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
+      const fallbackReview = `I had a ${ratingText} experience at ${businessData?.name} in ${businessData?.location}. The service was outstanding and the staff was very professional. I would definitely recommend this place to anyone looking for quality service. Five stars!`
       setGeneratedReview(fallbackReview)
     }
     
@@ -104,8 +128,8 @@ export default function CustomerReviewPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          businessName: mockBusinessData.name,
-          businessEmail: mockBusinessData.email,
+          businessName: businessData?.name,
+          businessEmail: businessData?.email,
           customerEmail: 'Anonymous',
           feedback: feedback,
           rating: selectedRating,
@@ -130,13 +154,49 @@ export default function CustomerReviewPage() {
 
   const handleReviewSubmit = () => {
     // Open Google Review link in new tab
-    window.open(mockBusinessData.googleReviewLink, '_blank')
+    if (businessData?.google_review_link) {
+      window.open(businessData.google_review_link, '_blank')
+    }
     setShowReviewForm(false)
     setSelectedRating(null)
   }
 
   const handleEditReview = (newReview: string) => {
     setGeneratedReview(newReview)
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+              <p className="text-muted-foreground">Loading business information...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !businessData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg shadow-lg border-0 bg-card/95 backdrop-blur-sm">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <p className="text-destructive font-medium">{error || 'Business not found'}</p>
+              <Button variant="outline" asChild>
+                <Link href="/demo">Back to Home</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -155,10 +215,14 @@ export default function CustomerReviewPage() {
         <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
           <CardHeader className="text-center pb-6">
             <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-sm">
-              <span className="text-3xl">🍕</span>
+              {businessData.logo_url ? (
+                <img src={businessData.logo_url} alt={businessData.name} className="w-12 h-12 rounded-lg object-cover" />
+              ) : (
+                <span className="text-3xl">🍕</span>
+              )}
             </div>
-            <CardTitle className="text-2xl font-bold">{mockBusinessData.name}</CardTitle>
-            <CardDescription className="text-base">{mockBusinessData.location}</CardDescription>
+            <CardTitle className="text-2xl font-bold">{businessData.name}</CardTitle>
+            <CardDescription className="text-base">{businessData.location}</CardDescription>
           </CardHeader>
         <CardContent className="space-y-6">
           {!selectedRating ? (
@@ -246,13 +310,13 @@ export default function CustomerReviewPage() {
                   Private Feedback
                 </DialogTitle>
                 <DialogDescription>
-                  Your feedback will be sent directly to {mockBusinessData.name} to help them improve.
+                  Your feedback will be sent directly to {businessData.name} to help them improve.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Your feedback will be sent directly to {mockBusinessData.name} to help them improve.
+                    Your feedback will be sent directly to {businessData.name} to help them improve.
                   </p>
                 </div>
                 <div>

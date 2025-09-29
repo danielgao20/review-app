@@ -17,7 +17,7 @@ export default function DemoPage() {
             </h1>
             <div className="flex gap-4">
               <Button variant="outline" asChild>
-                <Link href="/">Setup Business</Link>
+                <Link href="/auth/signup">Get Started</Link>
               </Button>
               <Button asChild>
                 <Link href="/review/marios-pizza">View Demo</Link>
@@ -39,7 +39,7 @@ export default function DemoPage() {
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg" asChild className="shadow-lg">
-              <Link href="/">Get Started</Link>
+              <Link href="/auth/signup">Get Started</Link>
             </Button>
             <Button variant="outline" size="lg" asChild className="shadow-lg">
               <Link href="/review/marios-pizza">Try Demo</Link>
@@ -158,7 +158,7 @@ export default function DemoPage() {
             Set up your review funnel in minutes and start collecting more reviews today.
           </p>
           <Button size="lg" asChild>
-            <Link href="/">
+            <Link href="/auth/signup">
               Create Your Review Page
               <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
