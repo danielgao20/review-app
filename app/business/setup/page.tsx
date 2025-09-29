@@ -131,7 +131,7 @@ export default function BusinessSetupPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Keywords (optional)</label>
+                <label className="text-sm font-medium">Keywords (Add SEO-optimized, high-intent, local keywords)</label>
                 <Input
                   name="keywords"
                   placeholder="e.g., restaurant, pizza, delivery"
