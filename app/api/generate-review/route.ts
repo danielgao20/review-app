@@ -35,6 +35,7 @@ Requirements:
 - 3-4 sentences long
 - End with a recommendation
 - Make it sound like a real customer review
+- Do not use em dashes
 `
 
     const completion = await openai.chat.completions.create({
