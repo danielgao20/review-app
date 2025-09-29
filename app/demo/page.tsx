@@ -99,7 +99,7 @@ export default function DemoPage() {
                 <div className="space-y-2">
                   <h4 className="font-medium">2. Smart Routing</h4>
                   <p className="text-sm text-muted-foreground">
-                    Bad/OK → Private feedback form, Good/Excellent → AI review
+                    Bad/OK → Private feedback form, Good/Excellent → Google review
                   </p>
                 </div>
                 <div className="space-y-2">
