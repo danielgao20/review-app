@@ -41,7 +41,7 @@ export default function DemoPage() {
               <Link href="/auth/signup">Get More Reviews Now</Link>
             </Button>
             <Button variant="outline" size="lg" asChild className="shadow-lg bg-[#FFFFFF] text-[#2563EB] border-[#2563EB] hover:bg-[#EFF6FF]">
-              <Link href="/marios-pizza">See It In Action</Link>
+              <Link href="/marios-pizza" target="_blank" rel="noopener noreferrer">See It In Action</Link>
             </Button>
           </div>
         </div>
