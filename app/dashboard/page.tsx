@@ -72,7 +72,7 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Review Funnel Dashboard
+              LeaveRatings Dashboard
             </h1>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">

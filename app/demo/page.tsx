@@ -13,7 +13,7 @@ export default function DemoPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Review Funnel
+              LeaveRatings
             </h1>
             <div className="flex gap-4">
               <Button variant="outline" asChild>
@@ -169,7 +169,7 @@ export default function DemoPage() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 Review Funnel. Built with Next.js and shadcn/ui.</p>
+          <p>© 2025 LeaveRatings.</p>
         </div>
       </footer>
     </div>

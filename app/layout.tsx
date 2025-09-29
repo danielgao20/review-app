@@ -6,7 +6,7 @@ import { Providers } from '@/components/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Review Funnel',
+  title: 'LeaveRatings',
   description: 'Simple review funnel for businesses',
 }
 

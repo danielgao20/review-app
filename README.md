@@ -1,4 +1,4 @@
-# Review Funnel App (LeaveRatings)
+# Review App (LeaveRatings)
 
 A simple, public-facing review funnel that businesses can set up for their customers. Built with Next.js, TypeScript, and shadcn/ui with a clean black and white design.
 

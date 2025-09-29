@@ -46,7 +46,7 @@ Feedback:
 ${feedback}
 
 ---
-This feedback was sent via Review Funnel App.
+This feedback was sent via LeaveRatings App.
     `.trim()
 
     const mailOptions = {
@@ -71,7 +71,7 @@ This feedback was sent via Review Funnel App.
           </div>
           <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
           <p style="color: #6c757d; font-size: 12px; text-align: center;">
-            This feedback was sent via Review Funnel App.
+            This feedback was sent via LeaveRatings App.
           </p>
         </div>
       `
