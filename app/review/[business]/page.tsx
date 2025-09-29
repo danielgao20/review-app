@@ -138,13 +138,13 @@ export default function CustomerReviewPage({ params }: { params: { business: str
       })
 
       if (response.ok) {
-        alert('Thank you for your feedback! We\'ll use it to improve our service.')
+        alert('Thank you for your feedback! It has been sent directly to the business owner.')
       } else {
-        alert('Thank you for your feedback! We\'ll use it to improve our service.')
+        alert('Thank you for your feedback! It has been sent directly to the business owner.')
       }
     } catch (error) {
       // Still show success message even if email fails
-      alert('Thank you for your feedback! We\'ll use it to improve our service.')
+      alert('Thank you for your feedback! It has been sent directly to the business owner.')
     }
     
     setShowFeedbackForm(false)
