@@ -3,21 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-// Removed modal dialog components in favor of inline sections
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2, Check } from 'lucide-react'
 import Link from 'next/link'
 import { Business } from '@/types/database'
-
-interface BusinessData {
-  name: string
-  email: string
-  location: string
-  keywords: string
-  googleReviewLink: string
-  logo?: string
-}
 
 export default function CustomerReviewPage({ params }: { params: { business: string } }) {
   const [selectedRating, setSelectedRating] = useState<number | null>(null)
