@@ -271,6 +271,14 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   </Button>
                 ))}
               </div>
+              <div className="text-center">
+                <a
+                  href="https://leaveratings.com"
+                  className="text-sm text-muted-foreground underline underline-offset-4 hover:text-primary"
+                >
+                  Want this for your own business?
+                </a>
+              </div>
             </div>
           ) : (
             <div className="text-center space-y-6">
