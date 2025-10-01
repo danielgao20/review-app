@@ -30,11 +30,14 @@ export default function DemoPage() {
       {/* Hero Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6 text-[#111827] leading-tight py-2">
-            Your Customers Hate Writing Reviews. We Fixed That.
+          <h2 className="text-2xl font-bold mb-6 text-[#111827] leading-tight py-2">
+            AI-Powered Review Collection for Local Businesses
           </h2>
+          <h1 className="text-3xl font-bold mb-6 text-[#111827] leading-tight py-2">
+            Increase Positive Reviews, Decrease Negative Reviews. Rank higher.
+          </h1>
           <p className="text-xl text-[#4B5563] mb-8 max-w-2xl mx-auto leading-relaxed">
-            AI instantly generates the perfect, SEO optimized review for your happy customers. They just click and paste. More reviews. Less begging. Faster growth.
+            Your customers hate writing reviews — our tool makes it effortless. Happy customers get SEO-optimized reviews they can post in one click. Upset customers share private feedback with you instead.
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg" asChild className="shadow-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
