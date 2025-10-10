@@ -389,6 +389,20 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   )}
                 </Button>
               </div>
+              
+              {/* Google Review Link for Bad/OK ratings */}
+              {businessData?.google_review_link && (
+                <div className="text-center pt-4">
+                  <a
+                    href={businessData.google_review_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground underline underline-offset-4 hover:text-primary transition-colors"
+                  >
+                    Leave a Google Review
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
