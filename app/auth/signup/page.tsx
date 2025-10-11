@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Building2 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { ArrowLeft, Building2, Play } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SignUpPage() {
@@ -159,7 +160,38 @@ export default function SignUpPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Google Review Link</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-sm font-medium">Google Review Link</label>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        Tutorial
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl">
+                      <DialogHeader>
+                        <DialogTitle>How to Get Your Google Review Link</DialogTitle>
+                      </DialogHeader>
+                      <div className="w-full">
+                        <video
+                          controls
+                          className="w-full h-auto rounded-lg"
+                          preload="metadata"
+                        >
+                          <source src="/tutorial.mov" type="video/quicktime" />
+                          <source src="/tutorial.mov" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 <Input
                   name="googleReviewLink"
                   placeholder="https://g.page/r/your-business/review"
