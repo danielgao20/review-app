@@ -57,8 +57,15 @@ export default function DemoPage() {
 
           {/* Row 1: Video (left) / Text (right) */}
           <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto mb-16">
-            <div className="aspect-video bg-[#E5E7EB] rounded-xl flex items-center justify-center text-[#6B7280]">
-              ▶ Video
+            <div className="aspect-video rounded-xl overflow-hidden">
+              <video 
+                src="/demo1.mp4" 
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
             </div>
 
             <div className="flex flex-col justify-center space-y-4">
@@ -80,8 +87,15 @@ export default function DemoPage() {
               </p>
             </div>
 
-            <div className="order-1 md:order-2 aspect-video bg-[#E5E7EB] rounded-xl flex items-center justify-center text-[#6B7280]">
-              ▶ Video
+            <div className="order-1 md:order-2 aspect-video rounded-xl overflow-hidden">
+              <video 
+                src="/demo2.mp4" 
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
             </div>
           </div>
         </div>
