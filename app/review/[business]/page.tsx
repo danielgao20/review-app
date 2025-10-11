@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2, Check } from 'lucide-react'
+import { Star, MessageSquare, ExternalLink, ArrowLeft, Home, Loader2, Building2, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Business } from '@/types/database'
 
@@ -228,9 +228,11 @@ export default function CustomerReviewPage({ params }: { params: { business: str
               onClick={() => {
                 setSelectedRating(null)
                 setShowFeedbackForm(false)
+                setShowReviewForm(false)
                 setIsFeedbackSent(false)
                 setFeedback('')
                 setCustomerEmail('')
+                setGeneratedReview('')
               }}
               className="absolute left-3 top-3 z-10"
             >
@@ -299,14 +301,24 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   {selectedRating > 2 && !showReviewForm && (
                     <div className="space-y-4">
                       <p className="text-sm text-muted-foreground">
-                        Ready to share your experience? We'll help you write a great review.
+                        Ready to share your experience? We'll help you draft a review!
                       </p>
                       <Button 
                         onClick={handleGenerateReview}
-                        className="w-full"
+                        className="w-1/2"
                         disabled={isGenerating}
                       >
-                        {isGenerating ? 'Generating Review...' : 'Generate Review'}
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Generating Review...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Generate Review
+                          </>
+                        )}
                       </Button>
                     </div>
                   )}
