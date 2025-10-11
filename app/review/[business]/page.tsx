@@ -14,6 +14,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [feedback, setFeedback] = useState('')
+  const [customerEmail, setCustomerEmail] = useState('')
   const [generatedReview, setGeneratedReview] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [businessData, setBusinessData] = useState<Business | null>(null)
@@ -64,6 +65,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
     setShowFeedbackForm(false)
     setIsFeedbackSent(false)
     setFeedback('')
+    setCustomerEmail('')
   }, [params.business])
 
   // Hide feedback form when rating is cleared or changed to > 2
@@ -72,6 +74,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
       setShowFeedbackForm(false)
       setIsFeedbackSent(false)
       setFeedback('')
+      setCustomerEmail('')
     }
   }, [selectedRating])
 
@@ -136,7 +139,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
         body: JSON.stringify({
           businessName: businessData?.name,
           businessEmail: businessData?.email,
-          customerEmail: 'Anonymous',
+          customerEmail: customerEmail.trim() || 'Anonymous',
           feedback: feedback,
           rating: selectedRating,
           timestamp: new Date().toISOString()
@@ -148,8 +151,9 @@ export default function CustomerReviewPage({ params }: { params: { business: str
       // Still show success state even if email fails
       setIsFeedbackSent(true)
     }
-    // Keep the form open and selected rating; clear the text input
+    // Keep the form open and selected rating; clear the text inputs
     setFeedback('')
+    setCustomerEmail('')
     setIsFeedbackLoading(false)
   }
 
@@ -226,6 +230,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                 setShowFeedbackForm(false)
                 setIsFeedbackSent(false)
                 setFeedback('')
+                setCustomerEmail('')
               }}
               className="absolute left-3 top-3 z-10"
             >
@@ -328,14 +333,31 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                 </p>
               </div>
               {!isFeedbackSent ? (
-                <div>
-                  <label className="text-sm font-medium">How can we improve?</label>
-                  <Textarea
-                    placeholder="Tell us what went wrong and how we can do better..."
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    rows={6}
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">How can we improve?</label>
+                    <Textarea
+                      placeholder="Tell us what went wrong and how we can do better..."
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      rows={6}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">
+                      Email address (optional)
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="your@email.com"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Leave your email if you'd like us to respond directly to your feedback
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="rounded-md bg-muted p-3 text-left">
@@ -353,6 +375,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                     setShowReviewForm(false)
                     setIsFeedbackSent(false)
                     setFeedback('')
+                    setCustomerEmail('')
                   }}
                 >
                   Cancel
