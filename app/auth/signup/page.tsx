@@ -73,7 +73,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg space-y-6">
+      <div className="w-full max-w-lg space-y-4 sm:space-y-6">
         <div className="flex justify-start">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/demo">
@@ -84,18 +84,18 @@ export default function SignUpPage() {
         </div>
         
         <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-sm">
-              <Building2 className="h-8 w-8 text-primary" />
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-3 sm:mb-4 flex items-center justify-center shadow-sm">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl sm:text-2xl font-bold">Create Account</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Set up your business review funnel
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Email</label>
                   <Input
@@ -105,6 +105,7 @@ export default function SignUpPage() {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -116,6 +117,7 @@ export default function SignUpPage() {
                     value={formData.password}
                     onChange={handleChange}
                     required
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -128,6 +130,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -138,6 +141,7 @@ export default function SignUpPage() {
                   value={formData.businessName}
                   onChange={handleChange}
                   required
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -148,6 +152,7 @@ export default function SignUpPage() {
                   value={formData.location}
                   onChange={handleChange}
                   required
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -157,6 +162,7 @@ export default function SignUpPage() {
                   placeholder="e.g., restaurant, pizza, delivery"
                   value={formData.keywords}
                   onChange={handleChange}
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -174,7 +180,7 @@ export default function SignUpPage() {
                         Tutorial
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
+                    <DialogContent className="max-w-[95vw] sm:max-w-4xl">
                       <DialogHeader>
                         <DialogTitle>How to Get Your Google Review Link</DialogTitle>
                       </DialogHeader>
@@ -197,6 +203,7 @@ export default function SignUpPage() {
                   placeholder="https://g.page/r/your-business/review"
                   value={formData.googleReviewLink}
                   onChange={handleChange}
+                  className="text-sm"
                 />
               </div>
               {error && (

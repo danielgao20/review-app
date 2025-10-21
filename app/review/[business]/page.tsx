@@ -240,16 +240,16 @@ export default function CustomerReviewPage({ params }: { params: { business: str
               Back to rating
             </Button>
           )}
-          <CardHeader className="text-center pb-0 mt-8">
-            <div className="w-40 h-40 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-6 mb-6 flex items-center justify-center shadow-sm">
+          <CardHeader className="text-center pb-0 mt-4 sm:mt-8">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-4 sm:mt-6 mb-4 sm:mb-6 flex items-center justify-center shadow-sm">
               {businessData.logo_url ? (
-                <img src={businessData.logo_url} alt={businessData.name} className="w-36 h-36 rounded-lg object-cover" />
+                <img src={businessData.logo_url} alt={businessData.name} className="w-28 h-28 sm:w-36 sm:h-36 rounded-lg object-cover" />
               ) : (
-                <Building2 className="h-8 w-8 text-primary" />
+                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               )}
             </div>
-            <CardTitle className="text-2xl font-bold">{businessData.name}</CardTitle>
-            <CardDescription className="text-base">{businessData.location}</CardDescription>
+            <CardTitle className="text-xl sm:text-2xl font-bold">{businessData.name}</CardTitle>
+            <CardDescription className="text-sm sm:text-base">{businessData.location}</CardDescription>
             <div className="w-full py-6">
               <div className="h-px bg-border w-1/2 mx-auto" />
             </div>
@@ -265,15 +265,15 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   Tap an emoji to rate your visit
                 </p>
               </div>
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-2 sm:gap-3 justify-center">
                 {ratings.map((rating) => (
                   <Button
                     key={rating.value}
                     variant="outline"
-                    className="h-20 w-20 flex flex-col gap-2 hover:bg-accent hover:scale-105 transition-all duration-200 border-2 hover:border-primary/20"
+                    className="h-16 w-16 sm:h-20 sm:w-20 flex flex-col gap-1 sm:gap-2 hover:bg-accent hover:scale-105 transition-all duration-200 border-2 hover:border-primary/20"
                     onClick={() => handleRatingSelect(rating.value)}
                   >
-                    <span className="text-3xl">{rating.emoji}</span>
+                    <span className="text-2xl sm:text-3xl">{rating.emoji}</span>
                     <span className="text-xs font-medium">{rating.label}</span>
                   </Button>
                 ))}
@@ -283,14 +283,14 @@ export default function CustomerReviewPage({ params }: { params: { business: str
             <div className="text-center space-y-6">
               
               <div className="space-y-4">
-                <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-6 flex items-center justify-center shadow-sm">
-                  <span className="text-5xl">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mt-4 sm:mt-6 flex items-center justify-center shadow-sm">
+                  <span className="text-4xl sm:text-5xl">
                     {ratings.find(r => r.value === selectedRating)?.emoji}
                   </span>
                 </div>
                 
                 <div className="space-y-2">
-                  <p className="text-xl font-semibold">
+                  <p className="text-lg sm:text-xl font-semibold">
                     {ratings.find(r => r.value === selectedRating)?.label} Experience
                   </p>
                   {selectedRating <= 2 && (
@@ -305,7 +305,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                       </p>
                       <Button 
                         onClick={handleGenerateReview}
-                        className="w-1/2"
+                        className="w-full sm:w-1/2"
                         disabled={isGenerating}
                       >
                         {isGenerating ? (

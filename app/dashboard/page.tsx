@@ -184,55 +184,56 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
       {/* Header */}
       <header className="border-b bg-background">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               LeaveRatings Dashboard
             </h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
                 {session.user.email}
               </span>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-4">
+                <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Sign Out</span>
+                <span className="sm:hidden">Out</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         {business ? (
           <div className="space-y-8">
             {/* Business Info Card */}
             <Card className="shadow-none">
               <CardHeader>
-                <div className="flex items-center gap-4">
-                  <div className="w-32 h-32 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center shadow-sm">
                     {business.logo_url ? (
-                      <img src={business.logo_url} alt={business.name} className="w-28 h-28 rounded-lg object-cover" />
+                      <img src={business.logo_url} alt={business.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-lg object-cover" />
                     ) : (
-                      <Building2 className="h-8 w-8 text-primary" />
+                      <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-2xl">{business.name}</CardTitle>
-                    <CardDescription className="text-base">{business.location}</CardDescription>
+                  <div className="flex-1 text-center sm:text-left">
+                    <CardTitle className="text-xl sm:text-2xl">{business.name}</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">{business.location}</CardDescription>
                   </div>
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         <Pencil className="h-4 w-4 mr-2" /> Edit
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-[95vw] sm:max-w-md">
                       <DialogHeader>
                         <DialogTitle>Edit business details</DialogTitle>
                         <DialogDescription>Update your public-facing information.</DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="text-sm font-medium">Name</label>
                             <Input name="name" value={form.name} onChange={handleChange} placeholder="Business name" />
@@ -311,7 +312,7 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-semibold mb-2">Business Details</h3>
                     <div className="space-y-2 text-sm">
@@ -343,7 +344,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="shadow-none">
                 <CardHeader className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">

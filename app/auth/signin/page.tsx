@@ -48,7 +48,7 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-md space-y-4 sm:space-y-6">
         <div className="flex justify-start">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/demo">
@@ -59,12 +59,12 @@ export default function SignInPage() {
         </div>
         
         <Card className="w-full shadow-lg border-0 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-sm">
-              <Building2 className="h-8 w-8 text-primary" />
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl mx-auto mb-3 sm:mb-4 flex items-center justify-center shadow-sm">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl sm:text-2xl font-bold">Sign In</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Access your business dashboard
             </CardDescription>
           </CardHeader>
