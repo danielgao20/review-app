@@ -59,7 +59,7 @@ export default function DemoPage() {
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-6xl mx-auto mb-12 sm:mb-16">
             <div className="aspect-video rounded-xl overflow-hidden">
               <video 
-                src="/demo1.mp4" 
+                src="/demo1.mov" 
                 className="w-full h-full object-cover"
                 autoPlay
                 loop
@@ -89,7 +89,7 @@ export default function DemoPage() {
 
             <div className="order-1 md:order-2 aspect-video rounded-xl overflow-hidden">
               <video 
-                src="/demo2.mp4" 
+                src="/demo2.mov" 
                 className="w-full h-full object-cover"
                 autoPlay
                 loop
