@@ -26,9 +26,9 @@ A simple, public-facing review funnel that businesses can set up for their custo
    ```
 
 2. **Set up API Keys and Email**
-   The `.env.local` file is already created with your OpenAI API key. For email functionality, you'll need to add email configuration:
+   Create a `.env.local` file with your Anthropic Claude API key. For email functionality, you'll need to add email configuration:
    ```
-   OPENAI_API_KEY=your_openai_api_key_here
+   ANTHROPIC_API_KEY=your_anthropic_api_key_here
    
    # Email Configuration (optional - for feedback emails)
    SMTP_HOST=smtp.gmail.com
@@ -94,7 +94,7 @@ A simple, public-facing review funnel that businesses can set up for their custo
 - **Styling**: Tailwind CSS
 - **Components**: shadcn/ui
 - **Icons**: Lucide React
-- **AI**: OpenAI GPT for review generation
+- **AI**: Anthropic Claude for review generation
 - **Email**: Nodemailer for feedback delivery
 
 ## Email Setup (Optional)

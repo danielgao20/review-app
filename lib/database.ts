@@ -164,4 +164,58 @@ export class ReviewService {
 
     return data
   }
+
+  // Get last 3 generated reviews for a business (for uniqueness checking)
+  static async getLastGeneratedReviews(businessId: string, limit: number = 3): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('generated_review')
+      .eq('business_id', businessId)
+      .not('generated_review', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      console.error('Error fetching last generated reviews:', error)
+      return []
+    }
+
+    return data.map(review => review.generated_review).filter(Boolean)
+  }
+
+  // Keep only the most recent 3 reviews for a business, delete older ones
+  static async keepOnlyRecentReviews(businessId: string, keepCount: number = 3): Promise<void> {
+    try {
+      // Get all review IDs for this business, ordered by creation date (newest first)
+      const { data: allReviews, error: fetchError } = await supabase
+        .from('reviews')
+        .select('id')
+        .eq('business_id', businessId)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) {
+        console.error('Error fetching reviews for cleanup:', fetchError)
+        return
+      }
+
+      // If we have more than keepCount reviews, delete the older ones
+      if (allReviews && allReviews.length > keepCount) {
+        const reviewsToDelete = allReviews.slice(keepCount)
+        const idsToDelete = reviewsToDelete.map(review => review.id)
+
+        const { error: deleteError } = await supabase
+          .from('reviews')
+          .delete()
+          .in('id', idsToDelete)
+
+        if (deleteError) {
+          console.error('Error deleting old reviews:', deleteError)
+        } else {
+          console.log(`Cleaned up ${idsToDelete.length} old reviews for business ${businessId}`)
+        }
+      }
+    } catch (error) {
+      console.error('Error in keepOnlyRecentReviews:', error)
+    }
+  }
 }

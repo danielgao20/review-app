@@ -106,7 +106,8 @@ export default function CustomerReviewPage({ params }: { params: { business: str
           businessName: businessData?.name,
           location: businessData?.location,
           keywords: businessData?.keywords,
-          rating: rating
+          rating: rating,
+          businessId: businessData?.id
         }),
       })
 
