@@ -99,7 +99,7 @@ A simple, public-facing review funnel that businesses can set up for their custo
 
 ## Email Setup (Optional)
 
-The app can send feedback emails using SMTP. To set up email functionality:
+The app can send feedback emails and password reset emails using SMTP. To set up email functionality:
 
 1. **For Gmail users:**
    - Enable 2-factor authentication
@@ -112,7 +112,36 @@ The app can send feedback emails using SMTP. To set up email functionality:
 
 3. **Without email setup:**
    - Feedback will be logged to the console
+   - Password reset links will be logged to console in development
    - App will still function normally
+
+## Password Reset Feature
+
+The app includes a complete password reset system:
+
+1. **Forgot Password**: Users can request a password reset from the sign-in page
+2. **Email Reset Link**: A secure token is generated and sent via email
+3. **Reset Password**: Users can set a new password using the token from their email
+4. **Security**: Reset tokens expire after 1 hour for security
+
+### Database Requirements
+
+Make sure your `users` table includes these columns for password reset functionality:
+```sql
+ALTER TABLE users ADD COLUMN reset_token TEXT;
+ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP;
+```
+
+### Email Service Integration
+
+The password reset system uses the same Nodemailer configuration as the existing feedback system. It automatically uses your existing email settings from `.env.local`:
+
+- **SMTP_HOST**: Your SMTP server (e.g., smtp.gmail.com)
+- **SMTP_USER**: Your email address (e.g., leaveratings@gmail.com)
+- **SMTP_PASS**: Your email password or app password
+- **EMAIL_FROM**: Sender email address (defaults to leaveratings@gmail.com)
+
+No additional configuration needed - it uses the same email setup as your feedback system!
 
 ## Future Enhancements
 

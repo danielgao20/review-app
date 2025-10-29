@@ -28,6 +28,8 @@ export interface User {
   password_hash: string
   business_id: string | null
   role: string
+  reset_token: string | null
+  reset_token_expires: string | null
   created_at: string
   updated_at: string
 }
