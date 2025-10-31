@@ -9,10 +9,26 @@ export class BusinessService {
       .from('businesses')
       .select('*')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error fetching business by slug:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Server-side: Get business by slug with admin client (bypasses RLS)
+  static async adminGetBySlug(slug: string): Promise<Business | null> {
+    const { data, error } = await supabaseAdmin
+      .from('businesses')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching business by slug (admin):', error)
       return null
     }
 

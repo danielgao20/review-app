@@ -17,7 +17,7 @@ export async function GET(
       )
     }
 
-    const business = await BusinessService.getBySlug(slug)
+    const business = await BusinessService.adminGetBySlug(slug)
 
     if (!business) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Business slug is required' }, { status: 400 })
     }
 
-    const existing = await BusinessService.getBySlug(slug)
+    const existing = await BusinessService.adminGetBySlug(slug)
 
     if (!existing) {
       return NextResponse.json({ error: 'Business not found' }, { status: 404 })
