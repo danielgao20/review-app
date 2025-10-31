@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { ReviewService } from '@/lib/database'
+import { ReviewService, UserService, UsageService } from '@/lib/database'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -9,6 +11,25 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication required' 
+      }, { status: 401 })
+    }
+
+    // Check if user can generate more reviews
+    const canGenerate = await UsageService.canGenerateReview(session.user.id)
+    if (!canGenerate) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Review limit reached. Please upgrade to continue generating reviews.',
+        limitReached: true
+      }, { status: 403 })
+    }
+
     // Check if API key is configured
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error('Anthropic API key not configured')
@@ -84,6 +105,9 @@ Requirements:
           customer_email: null,
           is_posted_to_google: false
         })
+        
+        // Increment usage count for the user
+        await UsageService.incrementUsage(session.user.id, businessId)
         
         // Clean up old reviews, keeping only the most recent 3
         await ReviewService.keepOnlyRecentReviews(businessId, 3)

@@ -23,6 +23,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   const [isCopied, setIsCopied] = useState(false)
   const [isFeedbackSent, setIsFeedbackSent] = useState(false)
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false)
+  const [limitReached, setLimitReached] = useState(false)
 
   const ratings = [
     { emoji: '🤩', label: 'Excellent', value: 4 },
@@ -115,8 +116,13 @@ export default function CustomerReviewPage({ params }: { params: { business: str
         const data = await response.json()
         setGeneratedReview(data.review)
       } else {
-        // Fallback to blank review if API fails
-        setGeneratedReview('')
+        const errorData = await response.json()
+        if (errorData.limitReached) {
+          setLimitReached(true)
+        } else {
+          // Fallback to blank review if API fails
+          setGeneratedReview('')
+        }
       }
     } catch (error) {
       console.error('Error generating review:', error)
@@ -323,10 +329,42 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                       </Button>
                     </div>
                   )}
-                  {selectedRating > 2 && showReviewForm && (
+                  {selectedRating > 2 && showReviewForm && !limitReached && (
                     <p className="text-sm text-muted-foreground">
                       Edit your review below, then post it on Google
                     </p>
+                  )}
+                  {limitReached && (
+                    <div className="space-y-4">
+                      <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                          <span className="font-medium text-yellow-800">Review Limit Reached</span>
+                        </div>
+                        <p className="text-sm text-yellow-700">
+                          This business has reached their free review generation limit. 
+                          They can upgrade to continue generating unlimited reviews.
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          You can still leave a review directly on Google:
+                        </p>
+                        {businessData?.google_review_link && (
+                          <Button asChild variant="outline">
+                            <a
+                              href={businessData.google_review_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              Leave Google Review
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -435,7 +473,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
           )}
 
           {/* Inline Review Form */}
-          {showReviewForm && (
+          {showReviewForm && !limitReached && (
             <div className="space-y-4 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-1">
                 <Star className="h-5 w-5" />

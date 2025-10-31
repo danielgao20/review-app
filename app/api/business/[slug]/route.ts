@@ -8,6 +8,12 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { slug } = params
 
     if (!slug) {
@@ -17,13 +23,26 @@ export async function GET(
       )
     }
 
-    const business = await BusinessService.adminGetBySlug(slug)
+    let business = await BusinessService.adminGetBySlug(slug)
+
+    // If business not found by slug, try fetching by businessId from session
+    // This handles edge cases where slug might have changed or session is out of sync
+    if (!business && session.user.businessId) {
+      business = await BusinessService.getById(session.user.businessId)
+    }
 
     if (!business) {
+      // This should never happen since businesses are created during signup
+      console.error(`Business not found for user ${session.user.id}, slug: ${slug}, businessId: ${session.user.businessId}`)
       return NextResponse.json(
         { error: 'Business not found' },
         { status: 404 }
       )
+    }
+
+    // Ensure the authenticated user owns this business
+    if (!session.user.businessId || session.user.businessId !== business.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     return NextResponse.json({ business })
