@@ -105,7 +105,7 @@ export default function SignUpPage() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="text-sm"
+                    className="text-sm placeholder:text-sm"
                   />
                 </div>
                 <div>
@@ -117,7 +117,7 @@ export default function SignUpPage() {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="text-sm"
+                    className="text-sm placeholder:text-sm"
                   />
                 </div>
               </div>
