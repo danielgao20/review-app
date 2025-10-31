@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Extract the first few words from previous reviews to avoid similar beginnings
     const previousBeginnings = previousReviews.map(review => {
-      const firstWords = review.split(' ').slice(0, 4).join(' ')
+      const firstWords = review.split(' ').slice(0, 6).join(' ')
       return firstWords
     }).filter(Boolean)
 
@@ -53,7 +53,9 @@ Requirements:
 - End with a recommendation
 - Make it sound like a real customer review
 - Do not use em dashes
-- Make every review different and unique.${avoidBeginningsText}
+- Make every review different and unique.
+- Do not start with any meta text or preface (e.g., "Here's a positive google review:", "This is a review:", "Review:").
+- Output only the review text without any intro or labels.${avoidBeginningsText}
 `
 
     const completion = await anthropic.messages.create({
