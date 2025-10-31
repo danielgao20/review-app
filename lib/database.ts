@@ -1,11 +1,11 @@
-import { supabase, supabaseAdmin } from './supabase'
+import { supabaseAdmin } from './supabase'
 import { Business, Review } from '@/types/database'
 
 // Business CRUD operations
 export class BusinessService {
   // Get business by slug (for review pages)
   static async getBySlug(slug: string): Promise<Business | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('businesses')
       .select('*')
       .eq('slug', slug)
@@ -37,7 +37,7 @@ export class BusinessService {
 
   // Get business by ID
   static async getById(id: string): Promise<Business | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('businesses')
       .select('*')
       .eq('id', id)
@@ -53,7 +53,7 @@ export class BusinessService {
 
   // Create new business
   static async create(businessData: Omit<Business, 'id' | 'created_at' | 'updated_at'>): Promise<Business | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('businesses')
       .insert(businessData)
       .select()
@@ -69,7 +69,7 @@ export class BusinessService {
 
   // Update business
   static async update(id: string, updates: Partial<Omit<Business, 'id' | 'created_at' | 'updated_at'>>): Promise<Business | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('businesses')
       .update(updates)
       .eq('id', id)
@@ -96,7 +96,7 @@ export class BusinessService {
 
   // Check if slug is unique
   static async isSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
-    let query = supabase
+    let query = supabaseAdmin
       .from('businesses')
       .select('id')
       .eq('slug', slug)
@@ -134,7 +134,7 @@ export class BusinessService {
 export class ReviewService {
   // Create new review
   static async create(reviewData: Omit<Review, 'id' | 'created_at'>): Promise<Review | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('reviews')
       .insert(reviewData)
       .select()
@@ -150,7 +150,7 @@ export class ReviewService {
 
   // Get reviews for a business
   static async getByBusinessId(businessId: string): Promise<Review[]> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('reviews')
       .select('*')
       .eq('business_id', businessId)
@@ -166,7 +166,7 @@ export class ReviewService {
 
   // Update review (e.g., mark as posted to Google)
   static async update(id: string, updates: Partial<Omit<Review, 'id' | 'created_at'>>): Promise<Review | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('reviews')
       .update(updates)
       .eq('id', id)
@@ -183,7 +183,7 @@ export class ReviewService {
 
   // Get last 3 generated reviews for a business (for uniqueness checking)
   static async getLastGeneratedReviews(businessId: string, limit: number = 3): Promise<string[]> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('reviews')
       .select('generated_review')
       .eq('business_id', businessId)
@@ -203,7 +203,7 @@ export class ReviewService {
   static async keepOnlyRecentReviews(businessId: string, keepCount: number = 3): Promise<void> {
     try {
       // Get all review IDs for this business, ordered by creation date (newest first)
-      const { data: allReviews, error: fetchError } = await supabase
+      const { data: allReviews, error: fetchError } = await supabaseAdmin
         .from('reviews')
         .select('id')
         .eq('business_id', businessId)
@@ -219,7 +219,7 @@ export class ReviewService {
         const reviewsToDelete = allReviews.slice(keepCount)
         const idsToDelete = reviewsToDelete.map(review => review.id)
 
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await supabaseAdmin
           .from('reviews')
           .delete()
           .in('id', idsToDelete)
