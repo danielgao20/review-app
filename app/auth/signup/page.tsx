@@ -130,7 +130,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="text-sm"
+                  className="text-sm placeholder:text-sm"
                 />
               </div>
               <div>
