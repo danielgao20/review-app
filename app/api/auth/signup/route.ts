@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, businessName, location, keywords, googleReviewLink } = body
+    const { email, password, businessName, location, keywords, googleReviewLink, emailConsent } = body
 
     // Validate required fields
     if (!email || !password || !businessName || !location || !googleReviewLink) {
@@ -15,6 +15,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Get IP address from request
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+               request.headers.get('x-real-ip') || 
+               'unknown'
+
+    // Prepare email consent data
+    const consentGiven = emailConsent === true
+    const consentTimestamp = consentGiven ? new Date().toISOString() : null
+    const consentIp = consentGiven ? ip : null
 
     // Check if user already exists
     const { data: existingUser } = await supabaseAdmin
@@ -61,7 +71,10 @@ export async function POST(request: NextRequest) {
         email: email,
         password_hash: passwordHash,
         business_id: business.id,
-        role: 'business_owner'
+        role: 'business_owner',
+        email_consent: consentGiven,
+        email_consent_timestamp: consentTimestamp,
+        email_consent_ip: consentIp
       })
       .select()
       .single()

@@ -30,6 +30,9 @@ export interface User {
   role: string
   reset_token: string | null
   reset_token_expires: string | null
+  email_consent: boolean
+  email_consent_timestamp: string | null
+  email_consent_ip: string | null
   created_at: string
   updated_at: string
 }
