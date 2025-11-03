@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const { email, password, businessName, location, keywords, googleReviewLink } = body
 
     // Validate required fields
-    if (!email || !password || !businessName || !location) {
+    if (!email || !password || !businessName || !location || !googleReviewLink) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       email: email,
       location: location,
       keywords: keywords || null,
-      google_review_link: googleReviewLink || null,
+      google_review_link: googleReviewLink,
       logo_url: null,
       slug: slug
     })

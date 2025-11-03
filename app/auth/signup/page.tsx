@@ -167,7 +167,7 @@ export default function SignUpPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <label className="text-sm font-medium">Google Review Link</label>
+                  <label className="text-sm font-medium">Google Review Link *</label>
                   <a
                     href="https://support.google.com/business/answer/3474122?hl=en#:~:text=Share%20a%20link%20or%20QR%20code%20to%20request%20reviews"
                     target="_blank"
@@ -183,6 +183,7 @@ export default function SignUpPage() {
                   placeholder="https://g.page/r/your-business/review"
                   value={formData.googleReviewLink}
                   onChange={handleChange}
+                  required
                   className="text-sm"
                 />
               </div>
