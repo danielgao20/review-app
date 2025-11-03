@@ -223,6 +223,7 @@ export default function DemoPage() {
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-[#6B7280]">
           <p>© 2025 LeaveRatings.</p>
+          <p className="mt-2">leaveratings@gmail.com</p>
         </div>
       </footer>
     </div>
