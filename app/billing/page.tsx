@@ -60,7 +60,7 @@ export default function BillingPage() {
           // Set default usage if fetch fails
           setUsageData({
             currentUsage: 0,
-            limit: 25,
+            limit: 10,
             hasActiveSubscription: false
           })
         } else {
@@ -170,7 +170,7 @@ export default function BillingPage() {
   const usagePercentage = usageData?.hasActiveSubscription 
     ? 0 // Unlimited users - don't show progress bar filling
     : usageData 
-      ? (usageData.currentUsage / (usageData.limit || 25)) * 100 
+      ? (usageData.currentUsage / (usageData.limit || 10)) * 100 
       : 0
 
   if (loading) {
@@ -207,7 +207,7 @@ export default function BillingPage() {
                   <div>
                     <div className="flex justify-between text-sm text-gray-600 mb-1">
                       <span>Reviews used</span>
-                      <span>{usageData?.currentUsage || 0} / {usageData?.hasActiveSubscription ? '∞' : (usageData?.limit || 25)}</span>
+                      <span>{usageData?.currentUsage || 0} / {usageData?.hasActiveSubscription ? '∞' : (usageData?.limit || 10)}</span>
                     </div>
                     {usageData?.hasActiveSubscription ? (
                       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -231,7 +231,7 @@ export default function BillingPage() {
                       {usageData.currentUsage >= usageData.limit ? (
                         <p className="text-red-600 font-medium">You've reached your free limit. Upgrade to continue generating reviews.</p>
                       ) : (
-                        <p>{usageData.limit - usageData.currentUsage} reviews remaining</p>
+                        <p>{usageData.limit - usageData.currentUsage} free reviews remaining</p>
                       )}
                     </div>
                   )}
@@ -276,7 +276,7 @@ export default function BillingPage() {
                         <span className="font-medium text-gray-700">Free Plan</span>
                       </div>
                       <p className="text-sm text-gray-600 mb-4">
-                        25 reviews included
+                        10 reviews included
                       </p>
                       <div className="space-y-2">
                         <Button 
@@ -300,7 +300,7 @@ export default function BillingPage() {
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Free Plan</h3>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• 25 reviews</li>
+                    <li>• 10 reviews</li>
                     <li>• Basic review generation</li>
                     <li>• Email support</li>
                   </ul>

@@ -23,7 +23,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   const [isCopied, setIsCopied] = useState(false)
   const [isFeedbackSent, setIsFeedbackSent] = useState(false)
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false)
-  const [limitReached, setLimitReached] = useState(false)
+  const [canGenerateReviews, setCanGenerateReviews] = useState(false) // Default to false, will be set from API
 
   const ratings = [
     { emoji: '🤩', label: 'Excellent', value: 4 },
@@ -50,6 +50,8 @@ export default function CustomerReviewPage({ params }: { params: { business: str
 
         const data = await response.json()
         setBusinessData(data.business)
+        // Explicitly check if canGenerateReviews is true (not just truthy)
+        setCanGenerateReviews(data.canGenerateReviews === true)
       } catch (error) {
         console.error('Error fetching business data:', error)
         setError('Failed to load business data')
@@ -90,13 +92,19 @@ export default function CustomerReviewPage({ params }: { params: { business: str
   }
 
   const handleGenerateReview = () => {
-    if (selectedRating && selectedRating > 2) {
+    if (selectedRating && selectedRating > 2 && canGenerateReviews) {
       setIsGenerating(true)
       generateAIReview(selectedRating)
     }
   }
 
   const generateAIReview = async (rating: number) => {
+    // Don't proceed if limit is reached
+    if (!canGenerateReviews) {
+      setIsGenerating(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/generate-review', {
         method: 'POST',
@@ -115,23 +123,26 @@ export default function CustomerReviewPage({ params }: { params: { business: str
       if (response.ok) {
         const data = await response.json()
         setGeneratedReview(data.review)
+        setShowReviewForm(true)
       } else {
-        const errorData = await response.json()
-        if (errorData.limitReached) {
-          setLimitReached(true)
-        } else {
-          // Fallback to blank review if API fails
-          setGeneratedReview('')
+        // Handle limit reached error specifically
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 403 && errorData.limitReached) {
+          // Update the state to reflect limit reached
+          setCanGenerateReviews(false)
+          // Don't show blank review form
+          return
         }
+        // For other errors, show blank review
+        setGeneratedReview('')
+        setShowReviewForm(true)
       }
     } catch (error) {
       console.error('Error generating review:', error)
-      // Fallback to blank review if API fails
-      setGeneratedReview('')
+      // Don't show blank review on network errors either
+    } finally {
+      setIsGenerating(false)
     }
-    
-    setIsGenerating(false)
-    setShowReviewForm(true)
   }
 
   const handleFeedbackSubmit = async () => {
@@ -307,64 +318,61 @@ export default function CustomerReviewPage({ params }: { params: { business: str
                   )}
                   {selectedRating > 2 && !showReviewForm && (
                     <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Ready to share your experience? We'll help you draft a review!
-                      </p>
-                      <Button 
-                        onClick={handleGenerateReview}
-                        className="w-full sm:w-1/2"
-                        disabled={isGenerating}
-                      >
-                        {isGenerating ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Generating Review...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Generate Review
-                          </>
-                        )}
-                      </Button>
+                      {!canGenerateReviews ? (
+                        <div className="space-y-3">
+                          <p className="text-sm font-medium text-destructive">
+                            Review generation is currently unavailable
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            This business has reached their free review generation limit.
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            You can still share your experience directly on Google.
+                          </p>
+                          {businessData?.google_review_link && (
+                            <Button asChild variant="outline" className="w-full sm:w-auto">
+                              <a
+                                href={businessData.google_review_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                Leave a Google Review
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            Ready to share your experience? We'll help you draft a review!
+                          </p>
+                          <Button 
+                            onClick={handleGenerateReview}
+                            className="w-full sm:w-1/2"
+                            disabled={isGenerating || !canGenerateReviews}
+                          >
+                            {isGenerating ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Generating Review...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                Generate Review
+                              </>
+                            )}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
-                  {selectedRating > 2 && showReviewForm && !limitReached && (
+                  {selectedRating > 2 && showReviewForm && (
                     <p className="text-sm text-muted-foreground">
                       Edit your review below, then post it on Google
                     </p>
-                  )}
-                  {limitReached && (
-                    <div className="space-y-4">
-                      <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                          <span className="font-medium text-yellow-800">Review Limit Reached</span>
-                        </div>
-                        <p className="text-sm text-yellow-700">
-                          This business has reached their free review generation limit. 
-                          They can upgrade to continue generating unlimited reviews.
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          You can still leave a review directly on Google:
-                        </p>
-                        {businessData?.google_review_link && (
-                          <Button asChild variant="outline">
-                            <a
-                              href={businessData.google_review_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              Leave Google Review
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
                   )}
                 </div>
               </div>
@@ -473,7 +481,7 @@ export default function CustomerReviewPage({ params }: { params: { business: str
           )}
 
           {/* Inline Review Form */}
-          {showReviewForm && !limitReached && (
+          {showReviewForm && canGenerateReviews && (
             <div className="space-y-4 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-1">
                 <Star className="h-5 w-5" />

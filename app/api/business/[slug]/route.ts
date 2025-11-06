@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { BusinessService } from '@/lib/database'
+import { BusinessService, UserService, UsageService } from '@/lib/database'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
@@ -9,11 +9,6 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { slug } = params
 
     if (!slug) {
@@ -23,29 +18,27 @@ export async function GET(
       )
     }
 
-    let business = await BusinessService.adminGetBySlug(slug)
-
-    // If business not found by slug, try fetching by businessId from session
-    // This handles edge cases where slug might have changed or session is out of sync
-    if (!business && session.user.businessId) {
-      business = await BusinessService.getById(session.user.businessId)
-    }
+    const business = await BusinessService.adminGetBySlug(slug)
 
     if (!business) {
-      // This should never happen since businesses are created during signup
-      console.error(`Business not found for user ${session.user.id}, slug: ${slug}, businessId: ${session.user.businessId}`)
       return NextResponse.json(
         { error: 'Business not found' },
         { status: 404 }
       )
     }
 
-    // Ensure the authenticated user owns this business
-    if (!session.user.businessId || session.user.businessId !== business.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    // Check usage limit for review generation
+    // Always check the business owner's limit, regardless of who is viewing the page
+    let canGenerateReviews = true
+    const businessOwner = await UserService.getByBusinessId(business.id)
+    if (businessOwner) {
+      canGenerateReviews = await UsageService.canGenerateReview(businessOwner.id)
     }
 
-    return NextResponse.json({ business })
+    return NextResponse.json({ 
+      business,
+      canGenerateReviews 
+    })
 
   } catch (error) {
     console.error('Error fetching business:', error)

@@ -100,7 +100,7 @@ Requirements:
     // Store the generated review in the database (async - don't block response)
     if (businessId && generatedReview) {
       // Create review, increment usage, and cleanup can run in parallel for speed
-      // Cleanup will see the new review once create completes, and only deletes if count > 3
+      // Get business owner and increment usage for the correct user
       Promise.all([
         ReviewService.create({
           business_id: businessId,
@@ -110,12 +110,19 @@ Requirements:
           customer_email: null,
           is_posted_to_google: false
         }),
-        // Increment usage count for the user
-        UsageService.incrementUsage(session.user.id, businessId),
+        // Get business owner and increment usage (async, don't block response)
+        (async () => {
+          const businessOwner = await UserService.getByBusinessId(businessId)
+          if (businessOwner) {
+            await UsageService.incrementUsage(businessOwner.id, businessId)
+          }
+        })(),
         // Cleanup runs in parallel - it's safe because it only deletes if count > 3
         // Even if it runs before create completes, worst case is temporary 4 reviews
         ReviewService.keepOnlyRecentReviews(businessId, 3)
-      ]).catch(err => console.error('Error storing or cleaning reviews:', err))
+      ]).catch(error => {
+        console.error('Error storing or cleaning reviews:', error)
+      })
     }
 
     return NextResponse.json({ 

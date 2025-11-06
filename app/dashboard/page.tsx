@@ -521,23 +521,23 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
+                    <div className="max-w-md">
                       <div className="flex justify-between text-sm text-muted-foreground mb-1">
                         <span>Reviews used</span>
                         <span>
-                          {usageData.currentUsage} / {usageData.hasActiveSubscription ? '∞' : '25'}
+                          {usageData.currentUsage} / {usageData.hasActiveSubscription ? '∞' : '10'}
                         </span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full transition-all duration-300 ${
                             usageData.hasActiveSubscription ? 'bg-green-500' :
-                            usageData.currentUsage >= 25 ? 'bg-red-500' : 
-                            usageData.currentUsage >= 20 ? 'bg-yellow-500' : 'bg-green-500'
+                            usageData.currentUsage >= 10 ? 'bg-red-500' : 
+                            usageData.currentUsage >= 8 ? 'bg-yellow-500' : 'bg-green-500'
                           }`}
                           style={{ 
                             width: usageData.hasActiveSubscription ? '100%' : 
-                            `${Math.min((usageData.currentUsage / 25) * 100, 100)}%` 
+                            `${Math.min((usageData.currentUsage / 10) * 100, 100)}%` 
                           }}
                         ></div>
                       </div>
@@ -549,10 +549,10 @@ export default function DashboardPage() {
                           <span className="text-green-600 font-medium">✓ Pro Plan - Unlimited reviews</span>
                         ) : (
                           <span className="text-muted-foreground">
-                            {usageData.currentUsage >= 25 ? (
+                            {usageData.currentUsage >= 10 ? (
                               <span className="text-red-600 font-medium">Limit reached - Upgrade to continue</span>
                             ) : (
-                              `${25 - usageData.currentUsage} reviews remaining`
+                              `${10 - usageData.currentUsage} free reviews remaining`
                             )}
                           </span>
                         )}

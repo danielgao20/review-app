@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       currentUsage,
-      limit: hasActiveSubscription ? Infinity : 25,
+      limit: hasActiveSubscription ? Infinity : 10,
       hasActiveSubscription
     })
   } catch (error) {

@@ -328,6 +328,21 @@ export class UserService {
     }
     return data
   }
+
+  // Get user by business ID (find business owner)
+  static async getByBusinessId(businessId: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('business_id', businessId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching user by business ID:', error)
+      return null
+    }
+    return data
+  }
 }
 
 // Subscription operations
@@ -476,6 +491,6 @@ export class UsageService {
     }
 
     const totalUsage = await this.getTotalUsage(userId)
-    return totalUsage < 25 // Free tier lifetime limit
+    return totalUsage < 10 // Free tier lifetime limit
   }
 }
