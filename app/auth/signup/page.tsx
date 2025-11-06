@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ArrowLeft, Building2, Play, ExternalLink } from 'lucide-react'
@@ -17,16 +18,18 @@ export default function SignUpPage() {
     businessName: '',
     location: '',
     keywords: '',
-    googleReviewLink: ''
+    googleReviewLink: '',
+    emailConsent: false
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     }))
   }
 
@@ -186,6 +189,18 @@ export default function SignUpPage() {
                   required
                   className="text-sm"
                 />
+              </div>
+              <div className="flex items-start gap-2 pt-4">
+                <Checkbox
+                  name="emailConsent"
+                  id="emailConsent"
+                  checked={formData.emailConsent}
+                  onChange={handleChange}
+                  className="mt-0.5"
+                />
+                <label htmlFor="emailConsent" className="text-sm text-muted-foreground cursor-pointer">
+                  I agree to receive promotional emails and updates from LeaveRatings.
+                </label>
               </div>
               {error && (
                 <p className="text-sm text-destructive">{error}</p>

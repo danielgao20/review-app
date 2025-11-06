@@ -33,6 +33,9 @@ export interface User {
   stripe_customer_id: string | null
   subscription_status: 'active' | 'canceled' | 'incomplete' | 'past_due' | 'trialing' | 'unpaid' | null
   subscription_id: string | null
+  email_consent: boolean
+  email_consent_timestamp: string | null
+  email_consent_ip: string | null
   created_at: string
   updated_at: string
 }

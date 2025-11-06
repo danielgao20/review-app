@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Get previous reviews for this business to avoid similar beginnings
     let previousReviews: string[] = []
     if (businessId) {
-      previousReviews = await ReviewService.getLastGeneratedReviews(businessId, 3)
+      previousReviews = await ReviewService.getLastGeneratedReviews(businessId, 3).catch(() => [])
     }
 
     // Extract the first few words from previous reviews to avoid similar beginnings
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }).filter(Boolean)
 
     const avoidBeginningsText = previousBeginnings.length > 0 
-      ? `\n\nIMPORTANT: Avoid starting your review with these phrases that were used in recent reviews for this business:\n${previousBeginnings.map(beginning => `- "${beginning}..."`).join('\n')}\n\nMake sure your review starts with completely different words and phrases.`
+      ? `\n\nIMPORTANT: Avoid starting your review with these phrases that were used in recent reviews:\n${previousBeginnings.map(beginning => `- "${beginning}..."`).join('\n')}\n\nMake sure your review starts with completely different words.`
       : ''
 
     const prompt = `Write a positive Google review for ${businessName} in ${location}. 
@@ -74,16 +74,19 @@ Requirements:
 - End with a recommendation
 - Make it sound like a real customer review
 - Do not use em dashes
+- No logical flaws or contradictions.
 - Make every review different and unique.
-- Do not start with any meta text or preface (e.g., "Here's a positive google review:", "This is a review:", "Review:").
+- Do not start with any meta text or preface.
+- Occasionally drop "I" at the beginning of sentences for variety (e.g., "Been coming here for years" instead of "I've been coming here for years")
+- ABSOLUTELY FORBIDDEN: Never include placeholders like [Name], [word], [business], or any text in square brackets. The review must be 100% complete and ready to post with real words only.
 - Output only the review text without any intro or labels.${avoidBeginningsText}
 `
 
     const completion = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: "claude-3-haiku-20240307", // Faster model for quick review generation
       max_tokens: 200,
-      temperature: 0.9,
-      system: "You are a helpful assistant that writes authentic, positive Google reviews for businesses. Each review should sound like it was written by a different person with their own unique voice, writing style, and perspective. Avoid repetitive patterns and make each review feel fresh and original.",
+      temperature: 0.8, // Slightly lower for faster generation
+      system: "You are a helpful assistant that writes authentic, positive Google reviews. Each review must be 100% complete with no placeholders, brackets, or incomplete tags. Never use [Name], [word], or any text in square brackets. Occasionally drop 'I' at sentence beginnings for natural variation. Every review must be ready to post immediately.",
       messages: [
         {
           role: "user",
@@ -94,27 +97,25 @@ Requirements:
 
     const generatedReview = completion.content[0]?.type === 'text' ? completion.content[0].text : ''
 
-    // Store the generated review in the database if businessId is provided
+    // Store the generated review in the database (async - don't block response)
     if (businessId && generatedReview) {
-      try {
-        await ReviewService.create({
+      // Create review, increment usage, and cleanup can run in parallel for speed
+      // Cleanup will see the new review once create completes, and only deletes if count > 3
+      Promise.all([
+        ReviewService.create({
           business_id: businessId,
           rating: rating,
           generated_review: generatedReview,
           feedback: null,
           customer_email: null,
           is_posted_to_google: false
-        })
-        
+        }),
         // Increment usage count for the user
-        await UsageService.incrementUsage(session.user.id, businessId)
-        
-        // Clean up old reviews, keeping only the most recent 3
-        await ReviewService.keepOnlyRecentReviews(businessId, 3)
-      } catch (error) {
-        console.error('Error storing generated review:', error)
-        // Continue even if storage fails
-      }
+        UsageService.incrementUsage(session.user.id, businessId),
+        // Cleanup runs in parallel - it's safe because it only deletes if count > 3
+        // Even if it runs before create completes, worst case is temporary 4 reviews
+        ReviewService.keepOnlyRecentReviews(businessId, 3)
+      ]).catch(err => console.error('Error storing or cleaning reviews:', err))
     }
 
     return NextResponse.json({ 

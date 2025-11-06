@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2, Pencil, CreditCard } from 'lucide-react'
+import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2, Pencil, CreditCard, Download } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
   const [usageData, setUsageData] = useState<any>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -108,7 +109,33 @@ export default function DashboardPage() {
     }
   }, [session, status, router])
 
-  if (status === 'loading') {
+  // Generate QR code when business data is available
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (!business || typeof window === 'undefined') return
+
+      try {
+        // Dynamically import QRCode to avoid SSR issues
+        const QRCode = (await import('qrcode')).default
+        const reviewUrl = `${window.location.origin}/${business.slug}`
+        const dataUrl = await QRCode.toDataURL(reviewUrl, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        })
+        setQrCodeDataUrl(dataUrl)
+      } catch (error) {
+        console.error('Error generating QR code:', error)
+      }
+    }
+
+    generateQRCode()
+  }, [business])
+
+  if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -218,6 +245,17 @@ export default function DashboardPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleDownloadQRCode = () => {
+    if (!qrCodeDataUrl) return
+
+    const link = document.createElement('a')
+    link.download = `${business?.slug || 'review'}-qr-code.png`
+    link.href = qrCodeDataUrl
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
@@ -363,19 +401,52 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-2">Review Page</h3>
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        Your customers can leave reviews at:
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <code className="bg-muted px-2 py-1 rounded text-sm">
-                          {typeof window !== 'undefined' ? window.location.origin : ''}/{business.slug}
-                        </code>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/${business.slug}`} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
-                        </Button>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Your customers can leave reviews at:
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <code className="bg-muted px-2 py-1 rounded text-sm">
+                            {typeof window !== 'undefined' ? window.location.origin : ''}/{business.slug}
+                          </code>
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={`/${business.slug}`} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          QR Code for easy sharing:
+                        </p>
+                        <div className="flex flex-col items-start gap-3">
+                          {qrCodeDataUrl ? (
+                            <div className="flex items-center gap-4">
+                              <div className="bg-white p-2 rounded-lg border">
+                                <img 
+                                  src={qrCodeDataUrl} 
+                                  alt="QR Code" 
+                                  className="w-32 h-32"
+                                />
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleDownloadQRCode}
+                                className="flex items-center gap-2"
+                              >
+                                <Download className="h-4 w-4" />
+                                Download QR Code
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center w-32 h-32 bg-muted rounded-lg">
+                              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
