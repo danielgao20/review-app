@@ -72,8 +72,17 @@ export async function POST(request: NextRequest) {
               .eq('id', user.id)
           }
 
-          const startIso = new Date(subscription.current_period_start * 1000).toISOString()
-          const endIso = new Date(subscription.current_period_end * 1000).toISOString()
+          // Type guard: ensure period dates exist and are numbers
+          const periodStart = (subscription as any).current_period_start
+          const periodEnd = (subscription as any).current_period_end
+          
+          if (typeof periodStart !== 'number' || typeof periodEnd !== 'number') {
+            console.error('[WEBHOOK] Subscription missing period dates:', subscription.id)
+            break
+          }
+
+          const startIso = new Date(periodStart * 1000).toISOString()
+          const endIso = new Date(periodEnd * 1000).toISOString()
 
           const { error: userUpdateError } = await supabaseAdmin
             .from('users')
@@ -163,8 +172,17 @@ export async function POST(request: NextRequest) {
           const isActive = subscription.status === 'active' || subscription.status === 'trialing'
           const subscriptionStatus = isActive ? subscription.status : null
           
-          const startIso = new Date(subscription.current_period_start * 1000).toISOString()
-          const endIso = new Date(subscription.current_period_end * 1000).toISOString()
+          // Type guard: ensure period dates exist and are numbers
+          const periodStart = (subscription as any).current_period_start
+          const periodEnd = (subscription as any).current_period_end
+          
+          if (typeof periodStart !== 'number' || typeof periodEnd !== 'number') {
+            console.error('[WEBHOOK] Subscription missing period dates:', subscription.id)
+            break
+          }
+          
+          const startIso = new Date(periodStart * 1000).toISOString()
+          const endIso = new Date(periodEnd * 1000).toISOString()
 
           const { error: userUpdateError } = await supabaseAdmin
             .from('users')

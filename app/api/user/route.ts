@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { UserService, SubscriptionService } from '@/lib/database'
 import { stripe } from '@/lib/stripe'
+import Stripe from 'stripe'
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,17 +81,19 @@ export async function GET(request: NextRequest) {
             if (user.subscription_id !== activeSub.id) {
               const { supabaseAdmin } = await import('@/lib/supabase')
               // Fire and forget - don't block response
-              supabaseAdmin
-                .from('users')
-                .update({
-                  subscription_status: activeSub.status as any,
-                  subscription_id: activeSub.id
-                })
-                .eq('id', user.id)
+              Promise.resolve(
+                supabaseAdmin
+                  .from('users')
+                  .update({
+                    subscription_status: activeSub.status as any,
+                    subscription_id: activeSub.id
+                  })
+                  .eq('id', user.id)
+              )
                 .then(() => {
                   // Silently handle success
                 })
-                .catch((err) => {
+                .catch((err: any) => {
                   console.error('[USER] Error syncing subscription from customer lookup (async):', err)
                 })
             }
@@ -114,14 +117,16 @@ export async function GET(request: NextRequest) {
         if (user.subscription_status !== null) {
           const { supabaseAdmin } = await import('@/lib/supabase')
           // Fire and forget - don't block response
-          supabaseAdmin
-            .from('users')
-            .update({ subscription_status: null })
-            .eq('id', user.id)
+          Promise.resolve(
+            supabaseAdmin
+              .from('users')
+              .update({ subscription_status: null })
+              .eq('id', user.id)
+          )
             .then(() => {
               // Silently handle success
             })
-            .catch((err) => {
+            .catch((err: any) => {
               console.error('[USER] Error updating subscription status (async):', err)
             })
         }
@@ -136,10 +141,13 @@ export async function GET(request: NextRequest) {
           if (!isNaN(cancelDate.getTime())) {
             subscriptionEndDate = cancelDate.toISOString()
           }
-        } else if (foundSubscription.current_period_end && typeof foundSubscription.current_period_end === 'number') {
-          const endDate = new Date(foundSubscription.current_period_end * 1000)
-          if (!isNaN(endDate.getTime())) {
-            subscriptionEndDate = endDate.toISOString()
+        } else {
+          const periodEnd = (foundSubscription as any).current_period_end
+          if (periodEnd && typeof periodEnd === 'number') {
+            const endDate = new Date(periodEnd * 1000)
+            if (!isNaN(endDate.getTime())) {
+              subscriptionEndDate = endDate.toISOString()
+            }
           }
         }
         
@@ -147,17 +155,19 @@ export async function GET(request: NextRequest) {
         if (user.subscription_status !== foundSubscription.status) {
           const { supabaseAdmin } = await import('@/lib/supabase')
           // Fire and forget - don't block response
-          supabaseAdmin
-            .from('users')
-            .update({
-              subscription_status: foundSubscription.status as any,
-              subscription_id: foundSubscription.id
-            })
-            .eq('id', user.id)
+          Promise.resolve(
+            supabaseAdmin
+              .from('users')
+              .update({
+                subscription_status: foundSubscription.status as any,
+                subscription_id: foundSubscription.id
+              })
+              .eq('id', user.id)
+          )
             .then(() => {
               // Silently handle success
             })
-            .catch((err) => {
+            .catch((err: any) => {
               console.error('[USER] Error syncing subscription status (async):', err)
             })
         }
@@ -169,14 +179,16 @@ export async function GET(request: NextRequest) {
       isCanceling = false
       const { supabaseAdmin } = await import('@/lib/supabase')
       // Fire and forget - don't block response
-      supabaseAdmin
-        .from('users')
-        .update({ subscription_status: null, subscription_id: null })
-        .eq('id', user.id)
+      Promise.resolve(
+        supabaseAdmin
+          .from('users')
+          .update({ subscription_status: null, subscription_id: null })
+          .eq('id', user.id)
+      )
         .then(() => {
           // Silently handle success
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.error('[USER] Error clearing subscription (async):', err)
         })
     }
