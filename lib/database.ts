@@ -1,5 +1,5 @@
-import { supabaseAdmin } from './supabase'
-import { Business, Review } from '@/types/database'
+import { supabase, supabaseAdmin } from './supabase'
+import { Business, Review, User, Subscription, Usage } from '@/types/database'
 
 // Business CRUD operations
 export class BusinessService {
@@ -233,5 +233,264 @@ export class ReviewService {
     } catch (error) {
       console.error('Error in keepOnlyRecentReviews:', error)
     }
+  }
+}
+
+// User operations
+export class UserService {
+  // Get user by email
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async getByEmail(email: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching user by email:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Get user by ID
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async getById(id: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching user by ID:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Update user
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async update(id: string, updates: Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating user:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Get only subscription status (optimized for faster queries)
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async getSubscriptionStatus(userId: string): Promise<string | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('subscription_status')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching subscription status:', error)
+      return null
+    }
+
+    return data?.subscription_status || null
+  }
+
+  // Check if user has active subscription
+  static async hasActiveSubscription(userId: string): Promise<boolean> {
+    const status = await this.getSubscriptionStatus(userId)
+    return status === 'active'
+  }
+
+  // Get user by Stripe customer ID
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async getByStripeCustomerId(customerId: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching user by Stripe customer ID:', error)
+      return null
+    }
+    return data
+  }
+
+  // Get user by business ID (find business owner)
+  static async getByBusinessId(businessId: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('business_id', businessId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching user by business ID:', error)
+      return null
+    }
+    return data
+  }
+}
+
+// Subscription operations
+export class SubscriptionService {
+  // Create subscription
+  static async create(subscriptionData: Omit<Subscription, 'id' | 'created_at' | 'updated_at'>): Promise<Subscription | null> {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .insert(subscriptionData)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating subscription:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Get subscription by user ID
+  static async getByUserId(userId: string): Promise<Subscription | null> {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching subscription:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Update subscription
+  static async update(id: string, updates: Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>): Promise<Subscription | null> {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating subscription:', error)
+      return null
+    }
+
+    return data
+  }
+
+  // Upsert by stripe_subscription_id
+  static async upsertByStripeId(userId: string, stripeId: string, status: Subscription['status'], startIso: string, endIso: string): Promise<void> {
+    const { data: existing, error: fetchError } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('stripe_subscription_id', stripeId)
+      .single()
+
+    if (!fetchError && existing) {
+      await this.update(existing.id, {
+        status,
+        current_period_start: startIso,
+        current_period_end: endIso
+      })
+      return
+    }
+
+    await this.create({
+      user_id: userId,
+      stripe_subscription_id: stripeId,
+      status,
+      current_period_start: startIso,
+      current_period_end: endIso
+    })
+  }
+}
+
+// Usage tracking operations
+export class UsageService {
+  // Get lifetime usage
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async getTotalUsage(userId: string): Promise<number> {
+    const { data, error } = await supabaseAdmin
+      .from('usage')
+      .select('review_count')
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('Error fetching total usage:', error)
+      return 0
+    }
+
+    const total = (data || []).reduce((sum, row) => sum + (row.review_count || 0), 0)
+    return total
+  }
+
+  // Increment usage for current month
+  // Uses supabaseAdmin to bypass RLS policies (server-side operation)
+  static async incrementUsage(userId: string, businessId: string): Promise<void> {
+    const currentMonth = new Date().toISOString().slice(0, 7)
+    
+    // Try to update existing record first
+    const { data: existing, error: fetchError } = await supabaseAdmin
+      .from('usage')
+      .select('id, review_count')
+      .eq('user_id', userId)
+      .eq('month', currentMonth)
+      .maybeSingle()
+
+    if (existing && !fetchError) {
+      // Update existing record
+      const { error: updateError } = await supabaseAdmin
+        .from('usage')
+        .update({ review_count: existing.review_count + 1 })
+        .eq('id', existing.id)
+
+      if (updateError) {
+        console.error('Error updating usage:', updateError)
+      }
+    } else {
+      // Create new record
+      const { error: insertError } = await supabaseAdmin
+        .from('usage')
+        .insert({
+          user_id: userId,
+          business_id: businessId,
+          month: currentMonth,
+          review_count: 1
+        })
+
+      if (insertError) {
+        console.error('Error creating usage record:', insertError)
+      }
+    }
+  }
+
+  // Check if user can generate more reviews (free tier limit)
+  static async canGenerateReview(userId: string): Promise<boolean> {
+    const hasActiveSubscription = await UserService.hasActiveSubscription(userId)
+    
+    if (hasActiveSubscription) {
+      return true // Unlimited for paid users
+    }
+
+    const totalUsage = await this.getTotalUsage(userId)
+    return totalUsage < 10 // Free tier lifetime limit
   }
 }

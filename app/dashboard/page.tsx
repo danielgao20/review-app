@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2, Pencil, Download } from 'lucide-react'
+import { Building2, Star, MessageSquare, ExternalLink, LogOut, Loader2, Pencil, CreditCard, Download } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const [usageData, setUsageData] = useState<any>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null)
   const [form, setForm] = useState({
@@ -38,34 +39,73 @@ export default function DashboardPage() {
       return
     }
 
-    // Fetch business data
-    const fetchBusiness = async () => {
+    // Fetch all data together in parallel for faster loading
+    // Since businesses are created during signup, session should always have business data
+    const fetchData = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch(`/api/business/${session.user.business?.slug}`)
         
-        if (response.ok) {
-          const data = await response.json()
-          setBusiness(data.business)
+        // Use business from session if available (faster, no API call needed)
+        // Otherwise fetch by slug if available
+        if (session.user.business) {
+          // Use session business data directly
+          setBusiness(session.user.business)
           setForm({
-            name: data.business.name || '',
-            email: data.business.email || '',
-            location: data.business.location || '',
-            keywords: data.business.keywords || '',
-            google_review_link: data.business.google_review_link || ''
+            name: session.user.business.name || '',
+            email: session.user.business.email || '',
+            location: session.user.business.location || '',
+            keywords: session.user.business.keywords || '',
+            google_review_link: session.user.business.google_review_link || ''
           })
+        } else if (session.user.business?.slug) {
+          // Fallback: fetch business by slug if not in session (shouldn't happen normally)
+          const businessResponse = await fetch(`/api/business/${session.user.business.slug}`)
+          
+          if (businessResponse.ok) {
+            const data = await businessResponse.json()
+            setBusiness(data.business)
+            setForm({
+              name: data.business.name || '',
+              email: data.business.email || '',
+              location: data.business.location || '',
+              keywords: data.business.keywords || '',
+              google_review_link: data.business.google_review_link || ''
+            })
+          }
+        }
+        
+        // Always fetch usage data in parallel
+        const usageResponse = await fetch('/api/usage')
+        if (usageResponse.ok) {
+          const usage = await usageResponse.json()
+          setUsageData(usage)
         }
       } catch (error) {
-        console.error('Error fetching business:', error)
+        console.error('Error fetching data:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    if (session.user.business) {
-      fetchBusiness()
+    // Since businesses are created during signup, user should always have business
+    if (session.user.businessId || session.user.business) {
+      fetchData()
+      
+      // Check if we're returning from successful checkout
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.get('success') === 'true') {
+        // Wait a moment for webhook to process, then refresh
+        setTimeout(() => {
+          fetchData()
+          // Remove query param from URL
+          router.replace('/dashboard')
+        }, 2000)
+      }
     } else {
-      setIsLoading(false)
+      // This should never happen since businesses are created at signup
+      // But if it does, redirect to signin to refresh session
+      console.error('User session missing business data - redirecting to signin')
+      router.push('/auth/signin')
     }
   }, [session, status, router])
 
@@ -100,7 +140,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -418,6 +458,25 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="shadow-none">
                 <CardHeader className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                    <CreditCard className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <CardTitle className="text-lg">Billing & Usage</CardTitle>
+                  <CardDescription>
+                    Manage subscription and track usage
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <Button className="w-full" asChild>
+                    <Link href="/billing">
+                      Manage Billing
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-none">
+                <CardHeader className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-xl mx-auto mb-4 flex items-center justify-center">
                     <Star className="h-6 w-6 text-green-500" />
                   </div>
@@ -450,6 +509,66 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Usage Overview */}
+            {usageData && (
+              <Card className="shadow-none">
+                <CardHeader>
+                  <CardTitle className="text-xl">Usage Overview</CardTitle>
+                  <CardDescription>
+                    Track your review generation usage
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="max-w-md">
+                      <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                        <span>Reviews used</span>
+                        <span>
+                          {usageData.currentUsage} / {usageData.hasActiveSubscription ? '∞' : '10'}
+                        </span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            usageData.hasActiveSubscription ? 'bg-green-500' :
+                            usageData.currentUsage >= 10 ? 'bg-red-500' : 
+                            usageData.currentUsage >= 8 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}
+                          style={{ 
+                            width: usageData.hasActiveSubscription ? '100%' : 
+                            `${Math.min((usageData.currentUsage / 10) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm">
+                        {usageData.hasActiveSubscription ? (
+                          <span className="text-green-600 font-medium">✓ Pro Plan - Unlimited reviews</span>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            {usageData.currentUsage >= 10 ? (
+                              <span className="text-red-600 font-medium">Limit reached - Upgrade to continue</span>
+                            ) : (
+                              `${10 - usageData.currentUsage} free reviews remaining`
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      {!usageData.hasActiveSubscription && (
+                        <Button asChild size="sm">
+                          <Link href="/billing">
+                            Upgrade
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Instructions */}
             <Card className="shadow-none">
@@ -493,22 +612,11 @@ export default function DashboardPage() {
             </Card>
           </div>
         ) : (
-          <Card className="shadow-none">
-            <CardContent className="text-center py-12">
-              <div className="space-y-4">
-                <Building2 className="h-12 w-12 mx-auto text-muted-foreground" />
-                <h3 className="text-xl font-semibold">No Business Found</h3>
-                <p className="text-muted-foreground">
-                  It looks like you don't have a business associated with your account.
-                </p>
-                <Button asChild>
-                  <Link href="/business/setup">
-                    Set Up Your Business
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          // This should never be shown since businesses are created during signup
+          // Show loading state while data is being fetched
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
         )}
       </div>
     </div>

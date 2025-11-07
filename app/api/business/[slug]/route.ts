@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { BusinessService } from '@/lib/database'
+import { BusinessService, UserService, UsageService } from '@/lib/database'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
@@ -8,6 +8,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
     const { slug } = params
 
     if (!slug) {
@@ -26,7 +27,18 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ business })
+    // Check usage limit for review generation
+    // Always check the business owner's limit, regardless of who is viewing the page
+    let canGenerateReviews = true
+    const businessOwner = await UserService.getByBusinessId(business.id)
+    if (businessOwner) {
+      canGenerateReviews = await UsageService.canGenerateReview(businessOwner.id)
+    }
+
+    return NextResponse.json({ 
+      business,
+      canGenerateReviews 
+    })
 
   } catch (error) {
     console.error('Error fetching business:', error)
