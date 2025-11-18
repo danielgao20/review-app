@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { ReviewService, UserService, UsageService } from '@/lib/database'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -11,17 +9,28 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const body = await request.json()
+    const { businessName, location, keywords, rating, businessId } = body
+
+    // Validate required fields
+    if (!businessId) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Authentication required' 
-      }, { status: 401 })
+        error: 'Business ID is required' 
+      }, { status: 400 })
     }
 
-    // Check if user can generate more reviews
-    const canGenerate = await UsageService.canGenerateReview(session.user.id)
+    // Check if business owner can generate more reviews
+    // This is a public endpoint, so we check the business owner's limit, not the customer's
+    const businessOwner = await UserService.getByBusinessId(businessId)
+    if (!businessOwner) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Business not found' 
+      }, { status: 404 })
+    }
+
+    const canGenerate = await UsageService.canGenerateReview(businessOwner.id)
     if (!canGenerate) {
       return NextResponse.json({ 
         success: false, 
@@ -39,11 +48,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const body = await request.json()
-    const { businessName, location, keywords, rating, businessId } = body
-
     const ratingText = rating === 3 ? 'good' : 'excellent'
-    const keywordList = keywords.split(',').map((k: string) => k.trim()).join(', ')
+    const keywordList = keywords ? keywords.split(',').map((k: string) => k.trim()).join(', ') : ''
 
     // Get previous reviews for this business to avoid similar beginnings
     let previousReviews: string[] = []
@@ -98,9 +104,8 @@ Requirements:
     const generatedReview = completion.content[0]?.type === 'text' ? completion.content[0].text : ''
 
     // Store the generated review in the database (async - don't block response)
-    if (businessId && generatedReview) {
+    if (businessId && generatedReview && businessOwner) {
       // Create review, increment usage, and cleanup can run in parallel for speed
-      // Get business owner and increment usage for the correct user
       Promise.all([
         ReviewService.create({
           business_id: businessId,
@@ -110,13 +115,8 @@ Requirements:
           customer_email: null,
           is_posted_to_google: false
         }),
-        // Get business owner and increment usage (async, don't block response)
-        (async () => {
-          const businessOwner = await UserService.getByBusinessId(businessId)
-          if (businessOwner) {
-            await UsageService.incrementUsage(businessOwner.id, businessId)
-          }
-        })(),
+        // Increment usage for the business owner
+        UsageService.incrementUsage(businessOwner.id, businessId),
         // Cleanup runs in parallel - it's safe because it only deletes if count > 3
         // Even if it runs before create completes, worst case is temporary 4 reviews
         ReviewService.keepOnlyRecentReviews(businessId, 3)
