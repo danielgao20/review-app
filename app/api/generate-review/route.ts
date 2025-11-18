@@ -22,22 +22,22 @@ export async function POST(request: NextRequest) {
 
     // Check if business owner can generate more reviews
     // This is a public endpoint, so we check the business owner's limit, not the customer's
+    // If no user is linked, allow reviews (businesses can exist without users)
     const businessOwner = await UserService.getByBusinessId(businessId)
-    if (!businessOwner) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Business not found' 
-      }, { status: 404 })
+    
+    // Only check limits if a user is linked to the business
+    if (businessOwner) {
+      const canGenerate = await UsageService.canGenerateReview(businessOwner.id)
+      if (!canGenerate) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Review limit reached. Please upgrade to continue generating reviews.',
+          limitReached: true
+        }, { status: 403 })
+      }
     }
-
-    const canGenerate = await UsageService.canGenerateReview(businessOwner.id)
-    if (!canGenerate) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Review limit reached. Please upgrade to continue generating reviews.',
-        limitReached: true
-      }, { status: 403 })
-    }
+    // If no user is linked, allow reviews without limit checking
+    // (This allows businesses to work even if not fully set up with a user account)
 
     // Check if API key is configured
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -104,9 +104,9 @@ Requirements:
     const generatedReview = completion.content[0]?.type === 'text' ? completion.content[0].text : ''
 
     // Store the generated review in the database (async - don't block response)
-    if (businessId && generatedReview && businessOwner) {
-      // Create review, increment usage, and cleanup can run in parallel for speed
-      Promise.all([
+    if (businessId && generatedReview) {
+      // Create review, increment usage (if user exists), and cleanup can run in parallel for speed
+      const operations = [
         ReviewService.create({
           business_id: businessId,
           rating: rating,
@@ -115,12 +115,17 @@ Requirements:
           customer_email: null,
           is_posted_to_google: false
         }),
-        // Increment usage for the business owner
-        UsageService.incrementUsage(businessOwner.id, businessId),
         // Cleanup runs in parallel - it's safe because it only deletes if count > 3
         // Even if it runs before create completes, worst case is temporary 4 reviews
         ReviewService.keepOnlyRecentReviews(businessId, 3)
-      ]).catch(error => {
+      ]
+      
+      // Only increment usage if a user is linked to the business
+      if (businessOwner) {
+        operations.push(UsageService.incrementUsage(businessOwner.id, businessId))
+      }
+      
+      Promise.all(operations).catch(error => {
         console.error('Error storing or cleaning reviews:', error)
       })
     }
