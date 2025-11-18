@@ -32,6 +32,25 @@ export async function POST(request: NextRequest) {
       })
       customerId = customer.id
       await UserService.update(user.id, { stripe_customer_id: customerId })
+    } else {
+      // Verify customer exists in Stripe (handles test/live mode mismatches or deleted customers)
+      try {
+        await stripe.customers.retrieve(customerId)
+      } catch (customerError: any) {
+        // Customer doesn't exist - create a new one
+        if (customerError.code === 'resource_missing' || customerError.message?.includes('No such customer')) {
+          console.warn('[STRIPE] Customer not found in Stripe, creating new customer:', customerId)
+          const customer = await stripe.customers.create({
+            email: user.email,
+            name: user.email,
+          })
+          customerId = customer.id
+          await UserService.update(user.id, { stripe_customer_id: customerId })
+        } else {
+          // Re-throw other errors
+          throw customerError
+        }
+      }
     }
 
     // Check for existing active subscriptions in Stripe
@@ -92,7 +111,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (error: any) {
-    console.error('Error creating checkout session:', error)
+    console.error('[STRIPE] Error creating checkout session:', error)
+    
+    // Handle specific Stripe errors
+    if (error?.code === 'resource_missing' || error?.message?.includes('No such customer')) {
+      // This shouldn't happen now with validation, but handle gracefully
+      return NextResponse.json({ 
+        error: 'Customer account issue',
+        details: 'Please try again. If the problem persists, contact support.'
+      }, { status: 400 })
+    }
+    
     return NextResponse.json({ 
       error: 'Failed to create checkout session',
       details: error?.message || 'An unexpected error occurred. Please try again.'
@@ -113,9 +142,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
     }
 
+    // Verify customer exists in Stripe before creating portal session
+    let customerId = user.stripe_customer_id
+    try {
+      await stripe.customers.retrieve(customerId)
+    } catch (customerError: any) {
+      // Customer doesn't exist - return error
+      if (customerError.code === 'resource_missing' || customerError.message?.includes('No such customer')) {
+        console.error('[STRIPE] Customer not found in Stripe:', customerId)
+        return NextResponse.json({ 
+          error: 'Customer account not found',
+          details: 'Please contact support to resolve this issue.'
+        }, { status: 404 })
+      }
+      // Re-throw other errors
+      throw customerError
+    }
+
     // Create portal session
     const portalSession = await createPortalSession(
-      user.stripe_customer_id,
+      customerId,
       `${process.env.NEXTAUTH_URL}/dashboard`
     )
 
